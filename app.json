@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "PECS Korean",
+    "slug": "pecs_korean",
+    "version": "0.3.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.popsnake.pecs-korean"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.popsnake.pecs_korean"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "단어 카드 생성을 위해 카메라 권한이 필요합니다"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "da800d10-1037-4def-97fc-260d83bc01e6"
+      }
+    },
+    "owner": "popsnake"
+  }
+}
