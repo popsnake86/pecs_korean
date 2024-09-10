@@ -30,7 +30,7 @@ export default function Modal99({ isVisible, onClose, onCorrectAnswer }) {
   const callKeyboard = () => {
     setTimeout(() => {
       if (inputRef.current) {
-        Keyboard.dismiss();
+        //Keyboard.dismiss();
         inputRef.current.focus();
       }
     }, 500);

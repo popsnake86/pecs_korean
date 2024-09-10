@@ -123,7 +123,7 @@ export default function SettingsScreen() {
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>앱 버전</Text>
-        <Text style={styles.label3}>v0.3.1</Text>
+        <Text style={styles.label3}>v0.3.2</Text>
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>문의</Text>

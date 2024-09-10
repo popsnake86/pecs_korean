@@ -145,3 +145,8 @@ export default function App() {
     </>
   );
 }
+
+// Build
+// android : eas build --platform android --profile preview
+// ios : eas build --platform ios --profile production
+// npm install -g eas-cli

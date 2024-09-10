@@ -1,7 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Speech from "expo-speech";
+import { Audio } from "expo-av";
 
 import {
   getSelectedGrammarMode,
@@ -46,6 +47,15 @@ export default function PecsScreen() {
       setVerbCard(null);
     }, [])
   );
+
+  useEffect(() => {
+    async function enableAudioInSilentMode() {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+      });
+    }
+    enableAudioInSilentMode();
+  }, []);
 
   function DrawSubjectList() {
     if (grammarMode === "1" || grammarMode === "2") {
@@ -222,7 +232,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     height: windowWidth / 4 + 20 + 20,
     flexDirection: "row",
-    backgroundColor: "green",
+    backgroundColor: "gray",
   },
   selectedCard: {
     width: windowWidth / 4,
