@@ -1,5 +1,4 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { GlobalStyles } from "../../constants/styles.js";
 
 export default function Button({ children, onPress, mode, style }) {
   return (
@@ -22,13 +21,13 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 4,
     padding: 8,
-    backgroundColor: "white",
+    backgroundColor: "green",
   },
   flat: {
     backgroundColor: "transparent",
   },
   buttonText: {
-    color: "white",
+    color: "black",
     textAlign: "center",
   },
   flatText: {
@@ -36,7 +35,7 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.75,
-    backgroundColor: GlobalStyles.colors.primary100,
+    backgroundColor: "red",
     borderRadius: 4,
   },
 });

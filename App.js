@@ -1,59 +1,124 @@
-import { useEffect, useState } from "react";
-import { Text, Platform, Alert } from "react-native";
+import { useContext, useEffect, useState } from "react";
+import { SafeAreaView, StyleSheet, Text, Platform } from "react-native";
 import { enableScreens } from "react-native-screens";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import Feather from "@expo/vector-icons/Feather";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { Ionicons } from "@expo/vector-icons";
 
+import LoginScreen from "./screens/LoginScreen";
+import SignupScreen from "./screens/SignupScreen";
 import PecsScreen from "./screens/PecsScreen";
 import DeckManagementScreen from "./screens/DeckManagementScreen";
 import AddCardScreen from "./screens/AddCardScreen";
 import EditCardScreen from "./screens/EditCardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
-import { dbInit, dbInit2 } from "./data/database";
-import Modal99 from "./components/Modal99";
+import AuthContextProvider, { AuthContext } from "./store/auth-context";
 
 if (Platform.OS === "android") {
   enableScreens(true);
 }
 
-const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [nextRoute, setNextRoute] = useState(null);
-  const [navigationRef, setNavigationRef] = useState(null);
+  const Root = () => {
+    const [isTryingLogin, setIsTryingLogin] = useState(true);
 
-  const handleTabPress = (e, navigation, routeName) => {
-    e.preventDefault();
-    setNavigationRef(navigation);
-    setNextRoute(routeName);
-    setIsModalVisible(true);
+    const authCtx = useContext(AuthContext);
+
+    useEffect(() => {
+      async function fetchToken() {
+        const storedToken = await AsyncStorage.getItem("token");
+
+        if (storedToken) {
+          authCtx.authenticate(storedToken);
+        }
+        setIsTryingLogin(false);
+      }
+
+      fetchToken();
+    }, []);
+
+    if (isTryingLogin) {
+      return <Text>로딩중...</Text>;
+    }
+
+    return <Navigation />;
   };
 
-  const onCorrectAnswer = () => {
-    setIsModalVisible(false);
-    navigationRef.navigate(nextRoute);
+  function Navigation() {
+    const authCtx = useContext(AuthContext);
+
+    return (
+      <NavigationContainer>
+        {!authCtx.isAuthenticated && <AuthStack />}
+        {authCtx.isAuthenticated && <AuthenticatedStack />}
+      </NavigationContainer>
+    );
+  }
+
+  const AuthStack = () => {
+    return (
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: "white" },
+          headerTintColor: "black",
+          contentStyle: { backgroundColor: "gray" },
+        }}
+      >
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Signup" component={SignupScreen} />
+      </Stack.Navigator>
+    );
   };
 
-  useEffect(() => {
-    dbInit()
-      .then(() => {
-        dbInit2();
-      })
-      .catch((error) => {
-        Alert.alert("에러", error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  const AuthenticatedStack = () => {
+    const authCtx = useContext(AuthContext);
+
+    return (
+      <>
+        <Tab.Navigator initialRouteName="Pecs" screenOptions={{}}>
+          <Tab.Screen
+            name="Pecs"
+            component={PecsScreen}
+            options={{
+              headerShown: false,
+              tabBarLabel: "펙스",
+              tabBarIcon: () => (
+                <Ionicons name="grid-outline" size={20} color="black" />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="DeckManagement"
+            component={DeckManagementNavigator}
+            options={{
+              headerShown: false,
+              tabBarLabel: "카드설정",
+              tabBarIcon: () => (
+                <Ionicons name="folder-outline" size={20} color="black" />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              title: "환경설정",
+              tabBarLabel: "환경설정",
+              tabBarIcon: () => (
+                <Ionicons name="settings-outline" size={20} color="black" />
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </>
+    );
+  };
 
   function DeckManagementNavigator() {
     return (
@@ -83,68 +148,22 @@ export default function App() {
     );
   }
 
-  if (isLoading) {
-    return <Text>Loading...</Text>;
-  }
-
   return (
     <>
-      <StatusBar style="auto" />
-      <NavigationContainer>
-        <Tab.Navigator>
-          <Tab.Screen
-            name="Pecs"
-            component={PecsScreen}
-            options={{
-              title: "펙스",
-              tabBarIcon: () => (
-                <MaterialCommunityIcons
-                  name="card-multiple-outline"
-                  size={24}
-                  color="black"
-                />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="DeckManagement"
-            component={DeckManagementNavigator}
-            listeners={({ navigation }) => ({
-              tabPress: (e) => handleTabPress(e, navigation, "DeckManagement"),
-            })}
-            options={{
-              tabBarLabel: "덱 설정",
-              headerShown: false,
-              tabBarIcon: () => (
-                <Feather name="database" size={24} color="black" />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Settings"
-            component={SettingsScreen}
-            listeners={({ navigation }) => ({
-              tabPress: (e) => handleTabPress(e, navigation, "Settings"),
-            })}
-            options={{
-              title: "환경 설정",
-              tabBarIcon: () => (
-                <AntDesign name="setting" size={24} color="black" />
-              ),
-            }}
-          />
-        </Tab.Navigator>
-        <Modal99
-          isVisible={isModalVisible}
-          onClose={() => {
-            setIsModalVisible(false);
-          }}
-          onCorrectAnswer={onCorrectAnswer}
-        />
-      </NavigationContainer>
+      <SafeAreaView style={styles.container}>
+        <AuthContextProvider>
+          <Root />
+        </AuthContextProvider>
+      </SafeAreaView>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 // Build
 // android : eas build --platform android --profile preview

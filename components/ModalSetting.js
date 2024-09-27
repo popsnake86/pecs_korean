@@ -1,5 +1,5 @@
-import { Modal, Text, TouchableOpacity, StyleSheet, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Modal, Text, StyleSheet, View } from "react-native";
+import RadioButtons from "./UI/RadioButtons";
 
 export default function ModalSetting({
   isVisible,
@@ -15,22 +15,7 @@ export default function ModalSetting({
           <View style={styles.modalLabel}>
             <Text style={styles.modalTitleText}>{title}</Text>
           </View>
-          {items.map((item) => (
-            <TouchableOpacity
-              key={item.code}
-              style={styles.radioButtonItem}
-              onPress={() => onPress(item.code)}
-            >
-              <Ionicons
-                name={
-                  code === item.code ? "radio-button-on" : "radio-button-off"
-                }
-                size={24}
-                color="black"
-              />
-              <Text style={styles.modalItemText}>{item.description}</Text>
-            </TouchableOpacity>
-          ))}
+          <RadioButtons items={items} code={code} onPress={onPress} />
         </View>
       </View>
     </Modal>

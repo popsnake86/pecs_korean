@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -10,99 +10,96 @@ import {
 
 import ImagePicker from "../components/ImagePicker";
 import OutlinedButton from "../components/UI/OutlinedButton";
-import { getCardByText, insertCard } from "../data/database";
+import RadioButtons from "../components/UI/RadioButtons";
+
+import { addCard, getFolderList } from "../firebase/firestore";
+import { storeStorage } from "../firebase/storage";
+import { AuthContext } from "../store/auth-context";
 
 export default function AddCardScreen({ navigation, route }) {
-  //const [id, setId] = useState();
-  const cardType = route.params.type;
-  const [cardTypeText, setCardTypeText] = useState("");
-  const [cardText, setCardText] = useState("");
-  const [cardImageUrl, setCardImageUrl] = useState("");
-  //const [isCardDefault, setIsCardDefault] = useState("");
+  const authCtx = useContext(AuthContext);
+  const userID = authCtx.userID;
+
+  const [cardName, setCardName] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const isFolder = route.params.isFolder;
+  const [parent, setParent] = useState("");
+  const [folderList, setFolderList] = useState([]);
 
   useEffect(() => {
-    if (cardType === "S") {
-      setCardTypeText("주어");
-    } else if (cardType === "O") {
-      setCardTypeText("목적어");
-    } else if (cardType === "V") {
-      setCardTypeText("서술어");
+    const setFolderRadioButtonList = async () => {
+      getFolderList(userID).then((result) => {
+        const itemsArray = [];
+        itemsArray.push({
+          code: "",
+          description: "없음",
+        });
+        result.forEach((item) => {
+          itemsArray.push({
+            code: item.cardId,
+            description: item.cardName,
+          });
+        });
+        return setFolderList(itemsArray);
+      });
+    };
+
+    if (!isFolder) {
+      setFolderRadioButtonList();
     }
   }, []);
 
+  function DrawFolderRadioButtonList() {
+    return (
+      <>
+        <Text style={styles.label}>소속 폴더</Text>
+        <RadioButtons
+          items={folderList}
+          code={parent}
+          onPress={(code) => {
+            setParent(code);
+          }}
+        />
+      </>
+    );
+  }
+
   function takeImageHandler(imageUri) {
-    setCardImageUrl(imageUri);
+    setImageUrl(imageUri);
   }
 
   async function saveHandler() {
-    if (cardText === "") {
+    if (cardName === "") {
       Alert.alert("오류", "카드 이름을 입력하세요");
       return;
     }
 
-    if (cardImageUrl === "") {
+    if (imageUrl === "") {
       Alert.alert("오류", "카드 사진을 추가하세요");
       return;
     }
-
-    const isExists = await checkCardNameExists(cardText);
-    if (isExists) {
-      Alert.alert("오류", `${cardText}은(는) 이미 등록된 카드입니다 `);
-      return;
-    }
-
-    await saveCard(cardType, cardText, cardImageUrl)
+    await addCard(userID, cardName, imageUrl, isFolder, parent)
+      .then(() => {
+        storeStorage(userID, imageUrl);
+      })
       .then(() => {
         navigation.navigate("DeckManagementScreen");
-      })
-      .catch((error) => {
-        Alert.alert("Error", error);
-      });
-  }
-
-  async function checkCardNameExists(text) {
-    let isExists = false;
-
-    await getCardByText(text)
-      .then((result) => {
-        if (result.length > 0) {
-          isExists = true;
-        }
-      })
-      .catch((error) => {
-        Alert.alert("오류", error);
-        isExists = true;
-      });
-    return isExists;
-  }
-
-  async function saveCard(type, text, imageUrl) {
-    insertCard(type, text, imageUrl)
-      .then(() => {})
-      .catch((error) => {
-        Alert.alert("오류", error);
       });
   }
 
   return (
     <ScrollView style={styles.container}>
       <View>
-        <Text style={styles.label}>타입</Text>
+        <Text style={styles.label}>카드 이름</Text>
         <TextInput
-          value={cardTypeText}
-          readOnly="true"
-          style={[styles.input, styles.inputReadOnly]}
-        />
-      </View>
-      <View>
-        <Text style={styles.label}>이름</Text>
-        <TextInput
-          value={cardText}
-          onChangeText={setCardText}
+          value={cardName}
+          onChangeText={setCardName}
           style={styles.input}
         />
       </View>
       <ImagePicker onTakeImage={takeImageHandler} />
+
+      {isFolder ? "" : <DrawFolderRadioButtonList />}
 
       <OutlinedButton onPress={saveHandler} icon="save">
         카드 생성
@@ -119,6 +116,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: "bold",
+    fontSize: 16,
   },
   input: {
     marginVertical: 8,

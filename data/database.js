@@ -17,9 +17,10 @@ export async function dbInit() {
     CREATE TABLE IF NOT EXISTS card (
       id TEXT NOT NULL UNIQUE,
       type TEXT NOT NULL,
+      isFolder TEXT,
+      parent TEXT,
       text TEXT NOT NULL,
-      imageUrl TEXT NOT NULL,
-      isDefault TEXT
+      imageUrl TEXT NOT NULL
     );
   `);
 }
@@ -33,18 +34,6 @@ export async function dbInit2() {
     INSERT OR IGNORE INTO setting(settingName, code) VALUES
       ("grammarMode", "3"),
       ("readTwiceMode", "Y");
-    INSERT OR IGNORE INTO card(id, type, text, imageUrl, isDefault) VALUES
-      ("아빠_default", "S", "아빠", "", "X"),
-      ("엄마_default", "S", "엄마", "", "X"),
-      ("물_default", "O", "물", "", "X"),
-      ("젤리_default", "O", "젤리", "", "X"),
-      ("체리_default", "O", "체리", "", "X"),
-      ("심슨과자_default", "O", "심슨과자", "", "X"),
-      ("오징어땅콩_default", "O", "오징어땅콩", "", "X"),
-      ("바나나_default", "O", "바나나", "", "X"),
-      ("화장실_default", "O", "화장실", "", "X"),
-      ("주세요_default", "V", "주세요", "", "X"),
-      ("갈래요_default", "V", "갈래요", "", "X");
   `);
 }
 
@@ -82,22 +71,37 @@ export async function updateReadTwiceSetting(code) {
   );
 }
 
-export async function getAllCard(type) {
-  return await database.getAllAsync("SELECT * FROM card WHERE type = ?", type);
+export async function getAllFolder(type, parent) {
+  return await database.getAllAsync(
+    "SELECT * FROM card WHERE type = ? AND isFolder = ? AND parent = ?",
+    type,
+    "X",
+    parent
+  );
+}
+
+export async function getAllCard(type, parent) {
+  return await database.getAllAsync(
+    "SELECT * FROM card WHERE type = ? AND isFolder = ? AND parent = ?",
+    type,
+    "",
+    parent
+  );
 }
 
 export async function getCardByText(text) {
   return await database.getAllAsync("SELECT * FROM card WHERE text = ?", text);
 }
 
-export async function insertCard(type, text, imageUrl) {
+export async function insertCard(type, isFolder, parent, text, imageUrl) {
   return await database.runAsync(
-    "INSERT INTO card(id, type, text, imageUrl, isDefault) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO card(id, type, isFolder, parent, text, imageUrl) VALUES (?, ?, ?, ?, ?, ?)",
     text,
     type,
+    isFolder,
+    parent,
     text,
-    imageUrl,
-    ""
+    imageUrl
   );
 }
 

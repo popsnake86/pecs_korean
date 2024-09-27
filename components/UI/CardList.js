@@ -1,63 +1,66 @@
-import { useCallback, useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
-import { useIsFocused } from "@react-navigation/native";
+import { useContext, useCallback, useEffect, useState } from "react";
+import { Alert, FlatList, StyleSheet, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
-import DeckCard from "./DeckCard";
-import { getAllCard } from "../../data/database";
+import Card from "./Card";
+//import ModalFolder from "../ModalFolder";
+import EmptyMessage from "./EmptyMessage";
 
-export default function CardList({ type, onSelect }) {
-  const isFocused = useIsFocused();
-  const [items, setItems] = useState([]);
+import { getCards } from "../../firebase/firestore";
+import { AuthContext } from "../../store/auth-context";
 
-  useEffect(() => {
-    if (isFocused) {
-      getAllCard(type)
-        .then((result) => {
-          const itemsArray = [];
-          result.forEach((item) => {
-            itemsArray.push({
-              id: item.id,
-              type: item.type,
-              text: item.text,
-              imageUrl: item.imageUrl,
-              isDefault: item.isDefault,
-            });
-          });
-          setItems(itemsArray);
-        })
-        .catch((error) => {
-          Alert.alert("오류", error);
-        });
-    }
-  }, [isFocused]);
+export default function CardList({ onSelect, numColumns, parent, isEditMode }) {
+  const authCtx = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState([]);
 
-  if (items.length === 0) {
-    return <Text style={styles.warning}>등록된 카드가 없습니다</Text>;
+  useFocusEffect(
+    useCallback(() => {
+      const getCardsFromFirestore = async () => {
+        try {
+          if (authCtx.userID) {
+            const list = await getCards(authCtx.userID, parent);
+            setData(list || []);
+          }
+        } catch (error) {
+          Alert.alert("getCardsFromFirestore Error");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      getCardsFromFirestore();
+    }, [authCtx.userID, parent])
+  );
+
+  if (isLoading) {
+    return <EmptyMessage text="데이터를 불러오는 중입니다..." />;
   }
 
   return (
-    <FlatList
-      data={items}
-      keyExtractor={(item) => item.id}
-      style={styles.list}
-      renderItem={({ item }) => (
-        <View style={styles.view}>
-          <DeckCard item={item} onSelect={onSelect} />
-        </View>
-      )}
-    />
+    <>
+      <View style={styles.cardList}>
+        {data.length < 1 ? (
+          <EmptyMessage text="카드가 없습니다" />
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(data) => data.id}
+            style={styles.list}
+            numColumns={numColumns}
+            renderItem={({ item }) => (
+              <View>
+                <Card item={item} onSelect={onSelect} cardSize={4} />
+              </View>
+            )}
+          />
+        )}
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  warning: {
-    fontWeight: "bold",
-    fontSize: 18,
-  },
   list: {
     flex: 1,
-  },
-  view: {
-    marginBottom: 10,
   },
 });

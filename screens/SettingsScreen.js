@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useContext } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Switch,
@@ -7,82 +8,27 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  getAllGrammarMode,
-  getSelectedGrammarMode,
-  getSelectedReadTwiceMode,
-  updateGrammarSetting,
-  updateReadTwiceSetting,
-} from "../data/database";
 import ModalSetting from "../components/ModalSetting";
+import OutlinedButton from "../components/UI/OutlinedButton";
+
+import { logout } from "../firebase/auth";
+import { AuthContext } from "../store/auth-context";
 
 export default function SettingsScreen() {
-  const [grammarModalVisible, setGrammarModalVisible] = useState(false);
-  const [grammarValue, setGrammarValue] = useState(null);
-  const [grammarItems, setGrammarItems] = useState([]);
-  const [readTwiceValue, setReadTwiceValue] = useState(false);
-
   const licenses = require("../licenses.json");
+  const authCtx = useContext(AuthContext);
 
-  useEffect(() => {
-    getAllGrammarMode()
-      .then((result) => {
-        const grammarModesArray = [];
-        result.forEach((item) => {
-          grammarModesArray.push({
-            code: item.code,
-            description: item.description,
-          });
-        });
-        setGrammarItems(grammarModesArray);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    getSelectedGrammarMode()
-      .then((result) => {
-        setGrammarValue(result.code);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    getSelectedReadTwiceMode()
-      .then((result) => {
-        if (result.code === "Y") {
-          setReadTwiceValue(true);
-        } else {
-          setReadTwiceValue(false);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (grammarValue) {
-      updateGrammarSetting(grammarValue)
-        .then(() => {})
-        .catch((error) => {
-          console.log(error);
-        });
+  const handleLogout = async () => {
+    try {
+      const result = await logout();
+      authCtx.logout();
+    } catch (error) {
+      Alert.alert("handleLogout error", error);
     }
-  }, [grammarValue]);
+  };
 
-  useEffect(() => {
-    const value = readTwiceValue ? "Y" : "N";
-    updateReadTwiceSetting(value)
-      .then(() => {})
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [readTwiceValue]);
-
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity
+  /*
+ <TouchableOpacity
         style={styles.settingItemContainer}
         onPress={() => setGrammarModalVisible(true)}
       >
@@ -115,6 +61,15 @@ export default function SettingsScreen() {
         </View>
         <Switch value={readTwiceValue} onValueChange={setReadTwiceValue} />
       </View>
+  */
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.settingItemContainer}>
+        <OutlinedButton icon="log-out-outline" onPress={handleLogout}>
+          로그아웃
+        </OutlinedButton>
+      </View>
 
       <View style={styles.separator} />
 
@@ -123,7 +78,7 @@ export default function SettingsScreen() {
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>앱 버전</Text>
-        <Text style={styles.label3}>v0.3.2</Text>
+        <Text style={styles.label3}>v0.4.1</Text>
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>문의</Text>
