@@ -12,18 +12,25 @@ import ImagePicker from "../components/ImagePicker";
 import OutlinedButton from "../components/UI/OutlinedButton";
 import RadioButtons from "../components/UI/RadioButtons";
 
-import { addCard, getFolderList } from "../firebase/firestore";
-import { storeStorage } from "../firebase/storage";
+import {
+  addCard,
+  deleteCard,
+  editCard,
+  getFolderList,
+} from "../firebase/firestore";
+import { storeStorage, deleteStorage } from "../firebase/storage";
 import { AuthContext } from "../store/auth-context";
 
 export default function AddCardScreen({ navigation, route }) {
   const authCtx = useContext(AuthContext);
   const userID = authCtx.userID;
+  const isEditMode = route.params.isEditMode;
 
-  const [cardName, setCardName] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const cardId = route.params.cardId;
+  const [cardName, setCardName] = useState(route.params.cardName);
+  const [imageUrl, setImageUrl] = useState(route.params.imageUrl);
   const isFolder = route.params.isFolder;
-  const [parent, setParent] = useState("");
+  const [parent, setParent] = useState(route.params.parent);
   const [folderList, setFolderList] = useState([]);
 
   useEffect(() => {
@@ -78,13 +85,45 @@ export default function AddCardScreen({ navigation, route }) {
       Alert.alert("오류", "카드 사진을 추가하세요");
       return;
     }
-    await addCard(userID, cardName, imageUrl, isFolder, parent)
-      .then(() => {
-        storeStorage(userID, imageUrl);
-      })
-      .then(() => {
-        navigation.navigate("DeckManagementScreen");
-      });
+
+    if (!isEditMode) {
+      await addCard(userID, cardName, imageUrl, isFolder, parent)
+        .then(() => {
+          storeStorage(userID, imageUrl);
+        })
+        .then(() => {
+          navigation.navigate("DeckManagementScreen");
+        });
+    } else {
+      await editCard(userID, cardId, cardName, imageUrl, parent)
+        .then(() => {
+          if (route.params.imageUrl !== imageUrl) {
+            storeStorage(userID, imageUrl);
+            deleteStorage(userID, route.params.imageUrl);
+          }
+        })
+        .then(() => {
+          navigation.navigate("DeckManagementScreen");
+        });
+    }
+  }
+
+  async function deleteHandler() {
+    Alert.alert("카드 삭제", "정말로 삭제하시겠습니까?", [
+      {
+        text: "취소",
+        onPress: () => {},
+        style: "cancel",
+      },
+      {
+        text: "삭제",
+        onPress: () => {
+          deleteCard(cardId);
+          deleteStorage(userID, route.params.imageUrl);
+          navigation.navigate("DeckManagementScreen");
+        },
+      },
+    ]);
   }
 
   return (
@@ -97,13 +136,22 @@ export default function AddCardScreen({ navigation, route }) {
           style={styles.input}
         />
       </View>
-      <ImagePicker onTakeImage={takeImageHandler} />
+      <ImagePicker onTakeImage={takeImageHandler} prevImage={imageUrl} />
 
-      {isFolder ? "" : <DrawFolderRadioButtonList />}
+      {!isFolder && folderList.length > 0 ? <DrawFolderRadioButtonList /> : ""}
 
       <OutlinedButton onPress={saveHandler} icon="save">
-        카드 생성
+        {!isEditMode ? "카드 생성" : "카드 변경"}
       </OutlinedButton>
+
+      {isEditMode ? (
+        <OutlinedButton onPress={deleteHandler} icon="trash-outline">
+          카드 삭제
+        </OutlinedButton>
+      ) : (
+        ""
+      )}
+
       <View style={styles.marginBottom} />
     </ScrollView>
   );

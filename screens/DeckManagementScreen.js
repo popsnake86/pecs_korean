@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 
 import ModalFolder from "../components/ModalFolder";
 import CardList from "../components/UI/CardList";
@@ -17,48 +17,29 @@ export default function DeckManagementScreen({ navigation }) {
       setSelectedFolder(item.cardId);
       setIsModalFolderVisible(true);
     } else {
-      /*
-      if (item.type === "S") {
-        setSubjectCard(item);
-      } else if (item.type === "O") {
-        setObjectCard(item);
-      } else if (item.type === "V") {
-        setVerbCard(item);
-      }
-        */
+      setIsModalFolderVisible(false);
+      editCardHandler(item);
     }
   }
 
   function addCardHandler(isFolder) {
-    navigation.navigate("AddCardScreen", { isFolder: isFolder });
+    navigation.navigate("AddCardScreen", {
+      isFolder: isFolder,
+      parent: "",
+      isEditMode: false,
+    });
   }
 
   function editCardHandler(item) {
-    navigation.navigate("EditCardScreen", {
-      id: item.id,
-      type: item.type,
-      text: item.text,
+    navigation.navigate("AddCardScreen", {
+      cardId: item.cardId,
+      cardName: item.cardName,
       imageUrl: item.imageUrl,
-      isDefault: item.isDefault,
+      parent: item.parent,
+      isFolder: item.isFolder,
+      isEditMode: true,
     });
   }
-  /*
-  {selectedFolder ? (
-          <ModalFolder
-            isVisible={isModalFolderVisible}
-            parent={selectedFolder}
-            onPress={(item) => {
-              //setVerbCard(item);
-
-              setIsModalFolderVisible(false);
-            }}
-            onClose={() => {
-              setIsModalFolderVisible(false);
-            }}
-          />
-        ) : (
-          ""
-        )}*/
 
   return (
     <View style={styles.container}>

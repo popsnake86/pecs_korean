@@ -7,7 +7,9 @@ import {
   orderBy,
   limit,
   query,
+  updateDoc,
   where,
+  deleteDoc,
 } from "firebase/firestore";
 
 import { db } from "./firebase";
@@ -18,7 +20,6 @@ export const getCards = async (userID, parent) => {
       collection(db, "cards"),
       where("userID", "==", userID),
       where("parent", "==", parent),
-      orderBy("isFolder", "desc"),
       orderBy("order", "asc")
     );
     const querySnapshot = await getDocs(q);
@@ -26,6 +27,7 @@ export const getCards = async (userID, parent) => {
     let result = [];
     querySnapshot.forEach((item) => {
       result.push({
+        key: item.id,
         cardId: item.id,
         cardName: item.data().cardName,
         imageUrl: item.data().imageUrl,
@@ -45,7 +47,7 @@ export const getCards = async (userID, parent) => {
 export const addCard = async (userID, cardName, imageUrl, isFolder, parent) => {
   try {
     const fileName = imageUrl.split("/").pop();
-    const order = await getLastOrderNumber(userID, parent, isFolder);
+    const order = await getLastOrderNumber(userID, parent);
 
     const result = await setDoc(doc(collection(db, "cards")), {
       userID: userID,
@@ -57,10 +59,49 @@ export const addCard = async (userID, cardName, imageUrl, isFolder, parent) => {
     });
   } catch (error) {
     Alert.alert("addCard error");
+    console.log("addCard error", error);
   }
 };
 
-const getLastOrderNumber = async (userID, parent, isFolder) => {
+export const editCard = async (userID, cardId, cardName, imageUrl, parent) => {
+  try {
+    const fileName = imageUrl.split("/").pop();
+    const order = await getLastOrderNumber(userID, parent);
+
+    const result = await updateDoc(doc(db, "cards", cardId), {
+      cardName: cardName,
+      imageUrl: fileName,
+      parent: parent,
+      isFolder: false,
+      order: order + 1,
+    });
+  } catch (error) {
+    Alert.alert("editCard error");
+    console.log("editCard error", error);
+  }
+};
+
+export const deleteCard = async (cardId) => {
+  try {
+    const cardRef = doc(db, "cards", cardId);
+    await deleteDoc(cardRef);
+  } catch (error) {
+    Alert.alert("deleteCard error");
+    console.log("deleteCard error", error);
+  }
+};
+
+export const updateOrder = async (cardId, order) => {
+  try {
+    const cardRef = doc(db, "cards", cardId);
+    await setDoc(cardRef, { order: order }, { merge: true });
+  } catch (error) {
+    Alert.alert("updateOrder error");
+    console.log(error);
+  }
+};
+
+const getLastOrderNumber = async (userID, parent) => {
   try {
     let order = 0;
 
@@ -68,7 +109,6 @@ const getLastOrderNumber = async (userID, parent, isFolder) => {
       collection(db, "cards"),
       where("userID", "==", userID),
       where("parent", "==", parent),
-      where("isFolder", "==", isFolder),
       orderBy("order", "desc"),
       limit(1)
     );
@@ -109,5 +149,6 @@ export const getFolderList = async (userID) => {
     return result;
   } catch (error) {
     Alert.alert("getFolderList error");
+    console.log(error);
   }
 };

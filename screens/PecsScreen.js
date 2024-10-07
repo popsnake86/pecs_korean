@@ -22,7 +22,12 @@ export default function PecsScreen() {
   useEffect(() => {
     async function enableAudioInSilentMode() {
       await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
+        playsInSilentModeIOS: true, // 무음 모드에서 재생 가능하도록 설정
+        allowsRecordingIOS: false,
+        interruptionModeIOS: 0,
+        playsThroughEarpieceIOS: false,
+        shouldDuckAndroid: false,
+        interruptionModeAndroid: 1,
       });
     }
     enableAudioInSilentMode();
@@ -64,6 +69,7 @@ export default function PecsScreen() {
   }, [selectedCards]);
 
   const PlayVoice = (text) => {
+    console.log(text);
     if (!isPlaying) {
       setIsPlaying(true);
       Speech.speak(text, {
@@ -81,13 +87,13 @@ export default function PecsScreen() {
         setSelectedFolder(item.cardId);
         setIsModalFolderVisible(true);
       } else {
-        if (selectedCards.length < 5) {
+        if (selectedCards.length < 5 && !isPlaying) {
           setSelectedCards((prevCards) => [...prevCards, item]);
           PlayVoice(item.cardName);
         }
       }
     },
-    [selectedCards]
+    [selectedCards, isPlaying]
   );
 
   return (

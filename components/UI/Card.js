@@ -1,33 +1,48 @@
 import { useContext, useEffect, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
+import * as FileSystem from "expo-file-system";
+
 import { getCardImageUrl } from "../../firebase/storage";
 import { AuthContext } from "../../store/auth-context";
 import { getWindowWidth } from "./Dimensions";
 
 const windowWidth = getWindowWidth();
 
-export default function Card({ item, onSelect, cardSize }) {
+export default function Card({ item, cardSize }) {
   const authCtx = useContext(AuthContext);
   const userID = authCtx.userID;
 
-  const [realImageUrl, setRealImageUrl] = useState(null);
+  const [imageUri, setImageUri] = useState(null);
 
   useEffect(() => {
-    const getRealUrl = async () => {
-      if (item.imageUrl) {
-        const url = await getCardImageUrl(userID, item.imageUrl);
-        setRealImageUrl(url);
+    const cacheImage = async () => {
+      const fileName = item.imageUrl;
+
+      if (!fileName) {
+        return;
+      }
+
+      const localUri = `${FileSystem.cacheDirectory}${fileName}`;
+      const fileInfo = await FileSystem.getInfoAsync(localUri);
+
+      if (fileInfo.exists) {
+        setImageUri(localUri);
+      } else {
+        const onlineUrl = await getCardImageUrl(userID, item.imageUrl);
+        const { uri: newUri } = await FileSystem.downloadAsync(
+          onlineUrl,
+          localUri
+        );
+        setImageUri(newUri);
       }
     };
-    getRealUrl();
+
+    cacheImage();
   }, []);
 
   if (item.isFolder === true) {
     return (
-      <Pressable
-        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-        onPress={() => onSelect(item)}
-      >
+      <View style={styles.card}>
         <View
           style={[
             styles.folderContainer,
@@ -51,10 +66,21 @@ export default function Card({ item, onSelect, cardSize }) {
                 },
               ]}
             >
-              {realImageUrl === null ? (
+              {imageUri === null ? (
                 <Text>Loading...</Text>
               ) : (
-                <Image source={{ uri: realImageUrl }} style={styles.image} />
+                <Image
+                  source={{
+                    uri: imageUri,
+                  }}
+                  style={[
+                    styles.image,
+                    {
+                      width: windowWidth / cardSize - 40,
+                      height: windowWidth / cardSize - 40,
+                    },
+                  ]}
+                />
               )}
             </View>
           </View>
@@ -62,14 +88,11 @@ export default function Card({ item, onSelect, cardSize }) {
         <View style={styles.title}>
           <Text style={styles.name}>{item.cardName}</Text>
         </View>
-      </Pressable>
+      </View>
     );
   } else {
     return (
-      <Pressable
-        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-        onPress={() => onSelect(item)}
-      >
+      <View style={styles.card}>
         <View
           style={[
             styles.imageContainer,
@@ -79,19 +102,36 @@ export default function Card({ item, onSelect, cardSize }) {
             },
           ]}
         >
-          {realImageUrl === null ? (
+          {imageUri === null ? (
             <Text>Loading...</Text>
           ) : (
-            <Image source={{ uri: realImageUrl }} style={styles.image} />
+            <Image
+              source={{ uri: imageUri }}
+              style={[
+                styles.image,
+                {
+                  width: windowWidth / cardSize - 20,
+                  height: windowWidth / cardSize - 20,
+                },
+              ]}
+            />
           )}
         </View>
         <View style={styles.title}>
           <Text style={styles.name}>{item.cardName}</Text>
         </View>
-      </Pressable>
+      </View>
     );
   }
 }
+
+/*
+<Pressable
+        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+        onPress={() => onSelect(item)}
+      >
+</Pressable>
+*/
 
 const styles = StyleSheet.create({
   card: {
@@ -123,7 +163,7 @@ const styles = StyleSheet.create({
   folderTabLeft: {
     flex: 2,
     marginTop: 6,
-    marginLeft: 6,
+    marginLeft: 8,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     backgroundColor: "#ffcc00",
@@ -134,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   folderBody: {
-    flex: 6,
+    flex: 5,
     padding: 8,
     backgroundColor: "#ffcc00",
     borderTopRightRadius: 10,
@@ -145,16 +185,17 @@ const styles = StyleSheet.create({
   },
   imageInFolderContainer: {
     borderRadius: 6,
-    overflow: "hidden",
+    //overflow: "hidden",
   },
   imageContainer: {
+    flex: 1,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
     overflow: "hidden",
   },
   image: {
-    width: "100%",
-    height: "100%",
     resizeMode: "cover",
   },
   title: {

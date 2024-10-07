@@ -1,5 +1,10 @@
 import { Alert } from "react-native";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { storage } from "./firebase";
 
 export async function getCardImageUrl(userID, fileName) {
@@ -25,6 +30,20 @@ export async function storeStorage(userID, image) {
         Alert.alert("uploadBytes Error");
         return false;
       });
+  } catch (error) {
+    Alert.alert("storeStorage Error");
+    console.log(error);
+  }
+}
+
+export async function deleteStorage(userID, image) {
+  try {
+    const fileName = image.split("/").pop();
+    const storageRef = ref(storage, `${userID}/cards/${fileName}`);
+
+    await deleteObject(storageRef).then(() => {
+      return true;
+    });
   } catch (error) {
     Alert.alert("storeStorage Error");
     console.log(error);

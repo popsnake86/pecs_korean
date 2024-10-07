@@ -1,13 +1,7 @@
 import { useContext } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import Constants from "expo-constants";
+
 import ModalSetting from "../components/ModalSetting";
 import OutlinedButton from "../components/UI/OutlinedButton";
 
@@ -17,6 +11,7 @@ import { AuthContext } from "../store/auth-context";
 export default function SettingsScreen() {
   const licenses = require("../licenses.json");
   const authCtx = useContext(AuthContext);
+  const appVersion = Constants.manifest2.extra.expoClient.version;
 
   const handleLogout = async () => {
     try {
@@ -78,7 +73,7 @@ export default function SettingsScreen() {
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>앱 버전</Text>
-        <Text style={styles.label3}>v0.4.1</Text>
+        <Text style={styles.label3}>{appVersion}</Text>
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>문의</Text>

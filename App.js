@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, Text, Platform } from "react-native";
 import { enableScreens } from "react-native-screens";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 
 import LoginScreen from "./screens/LoginScreen";
@@ -13,7 +13,6 @@ import SignupScreen from "./screens/SignupScreen";
 import PecsScreen from "./screens/PecsScreen";
 import DeckManagementScreen from "./screens/DeckManagementScreen";
 import AddCardScreen from "./screens/AddCardScreen";
-import EditCardScreen from "./screens/EditCardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 
@@ -80,7 +79,7 @@ export default function App() {
     const authCtx = useContext(AuthContext);
 
     return (
-      <>
+      <GestureHandlerRootView>
         <Tab.Navigator initialRouteName="Pecs" screenOptions={{}}>
           <Tab.Screen
             name="Pecs"
@@ -116,7 +115,7 @@ export default function App() {
             }}
           />
         </Tab.Navigator>
-      </>
+      </GestureHandlerRootView>
     );
   };
 
@@ -134,14 +133,7 @@ export default function App() {
           name="AddCardScreen"
           component={AddCardScreen}
           options={{
-            title: "카드 생성",
-          }}
-        />
-        <Stack.Screen
-          name="EditCardScreen"
-          component={EditCardScreen}
-          options={{
-            title: "카드 변경",
+            title: "카드 설정",
           }}
         />
       </Stack.Navigator>
