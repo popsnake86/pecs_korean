@@ -57,24 +57,25 @@ export default function PecsScreen() {
     }
   }, [selectedCards]);
 
-  const PlayHandler = useCallback(() => {
+  const PlayHandler = () => {
     if (selectedCards.length >= 1) {
       let text = "";
       selectedCards.forEach((item) => {
         text = text + item.cardName + " ";
       });
-      console.log(text);
       PlayVoice(text);
     }
-  }, [selectedCards]);
+  };
 
   const PlayVoice = (text) => {
-    console.log(text);
+    console.log("PlayVoice", text);
     if (!isPlaying) {
       setIsPlaying(true);
+      console.log("playvoice2", text);
       Speech.speak(text, {
         language: "ko-KR",
         onDone: () => {
+          console.log("playvoiceDone", text);
           setIsPlaying(false);
         },
       });

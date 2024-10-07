@@ -129,7 +129,7 @@ export default function AddCardScreen({ navigation, route }) {
   return (
     <ScrollView style={styles.container}>
       <View>
-        <Text style={styles.label}>카드 이름</Text>
+        <Text style={styles.label}>{isFolder ? "폴더 이름" : "카드 이름"}</Text>
         <TextInput
           value={cardName}
           onChangeText={setCardName}
@@ -141,12 +141,12 @@ export default function AddCardScreen({ navigation, route }) {
       {!isFolder && folderList.length > 0 ? <DrawFolderRadioButtonList /> : ""}
 
       <OutlinedButton onPress={saveHandler} icon="save">
-        {!isEditMode ? "카드 생성" : "카드 변경"}
+        {!isEditMode ? (isFolder ? "폴더 생성" : "카드 생성") : "카드 변경"}
       </OutlinedButton>
 
       {isEditMode ? (
         <OutlinedButton onPress={deleteHandler} icon="trash-outline">
-          카드 삭제
+          {isFolder ? "폴더 삭제" : "카드 삭제"}
         </OutlinedButton>
       ) : (
         ""
