@@ -1,11 +1,9 @@
-import { useContext, useCallback, useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
+import { useContext, useCallback, useState } from "react";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { DraggableGrid } from "react-native-draggable-grid";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useFocusEffect } from "@react-navigation/native";
 
 import Card from "./Card";
-//import ModalFolder from "../ModalFolder";
 import EmptyMessage from "./EmptyMessage";
 
 import { getCards, updateOrder } from "../../firebase/firestore";
@@ -56,24 +54,27 @@ export default function CardList({ onSelect, numColumns, parent, isEditMode }) {
       {data.length < 1 ? (
         <EmptyMessage text="카드가 없습니다" />
       ) : (
-        <DraggableGrid
-          data={data}
-          keyExtractor={(item) => item.key}
-          numColumns={numColumns}
-          disabledDrag={!isEditMode}
-          renderItem={(gridItem, drag, isActive) => (
-            <View>
-              <Card item={gridItem} cardSize={4} />
-            </View>
-          )}
-          onItemPress={(item) => {
-            onSelect(item);
-          }}
-          onDragRelease={(updatedItems) => {
-            const reOrderedItems = reOrder(updatedItems);
-            setData(reOrderedItems);
-          }}
-        />
+        <ScrollView>
+          <DraggableGrid
+            data={data}
+            keyExtractor={(item) => item.key}
+            numColumns={numColumns}
+            disabledDrag={!isEditMode}
+            delayLongPress={1000}
+            renderItem={(gridItem, drag, isActive) => (
+              <View>
+                <Card item={gridItem} cardSize={4} />
+              </View>
+            )}
+            onItemPress={(item) => {
+              onSelect(item);
+            }}
+            onDragRelease={(updatedItems) => {
+              const reOrderedItems = reOrder(updatedItems);
+              setData(reOrderedItems);
+            }}
+          />
+        </ScrollView>
       )}
     </View>
   );

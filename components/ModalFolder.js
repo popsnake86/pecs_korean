@@ -1,6 +1,9 @@
 import { Modal, Text, StyleSheet, View, ScrollView } from "react-native";
 import CardList from "./UI/CardList";
 import IconButton from "./UI/IconButton";
+import { getWindowWidth } from "./UI/Dimensions";
+
+const windowWidth = getWindowWidth();
 
 export default function ModalFolder({
   isVisible,
@@ -22,7 +25,7 @@ export default function ModalFolder({
             <Text style={styles.modalTitleText}></Text>
             <IconButton
               icon={"close-circle-outline"}
-              size={30}
+              size={windowWidth / 10}
               color={"black"}
               onPress={onClose}
             />
@@ -51,8 +54,11 @@ const styles = StyleSheet.create({
   modalContent: {
     height: "80%",
     width: "90%",
+    marginTop: "22%",
     backgroundColor: "white",
-    padding: 20,
+    //padding: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     borderRadius: 10,
     elevation: 5,
     shadowColor: "#000",
@@ -62,9 +68,9 @@ const styles = StyleSheet.create({
   },
   modalLabel: {
     flexDirection: "row",
-    alignItems: "center",
+    //alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
+    //marginBottom: 20,
   },
   modalTitleText: {
     fontSize: 18,

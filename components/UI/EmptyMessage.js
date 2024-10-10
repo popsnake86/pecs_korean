@@ -1,5 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import { getWindowWidth } from "./Dimensions";
+
+const windowWidth = getWindowWidth();
+
 export default function EmptyMessage({ text }) {
   return (
     <View style={styles.view}>
@@ -14,6 +18,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   text: {
-    fontSize: 18,
+    fontSize: windowWidth / 35,
   },
 });

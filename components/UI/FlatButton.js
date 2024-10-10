@@ -1,4 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { getWindowWidth } from "../UI/Dimensions";
+
+const windowWidth = getWindowWidth();
 
 function FlatButton({ children, onPress }) {
   return (
@@ -26,5 +29,6 @@ const styles = StyleSheet.create({
   buttonText: {
     textAlign: "center",
     color: "black",
+    fontSize: windowWidth / 35,
   },
 });

@@ -1,4 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { getWindowWidth } from "../UI/Dimensions";
+
+const windowWidth = getWindowWidth();
 
 export default function Button({ children, onPress, mode, style }) {
   return (
@@ -29,9 +32,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "black",
     textAlign: "center",
+    fontSize: windowWidth / 35,
   },
   flatText: {
     //color: GlobalStyles.colors.primary200,
+    //fontSize: windowWidth / 35,
   },
   pressed: {
     opacity: 0.75,

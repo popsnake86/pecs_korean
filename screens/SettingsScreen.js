@@ -11,7 +11,15 @@ import { AuthContext } from "../store/auth-context";
 export default function SettingsScreen() {
   const licenses = require("../licenses.json");
   const authCtx = useContext(AuthContext);
-  const appVersion = Constants.manifest2.extra.expoClient.version;
+
+  let appVersion = "";
+  try {
+    appVersion = Constants.expoConfig?.version;
+    //appVersion = Constants.manifest2.extra.expoClient.version;
+  } catch (error) {
+    Alert.alert("appVersion error");
+    console.log(error);
+  }
 
   const handleLogout = async () => {
     try {

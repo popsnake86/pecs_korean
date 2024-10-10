@@ -3,13 +3,13 @@ import { Alert, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
 import * as Speech from "expo-speech";
-import { Audio } from "expo-av";
 
 import ModalFolder from "../components/ModalFolder";
 import CardList from "../components/UI/CardList";
 import Card from "../components/UI/Card";
 import IconButton from "../components/UI/IconButton";
 import { getWindowWidth } from "../components/UI/Dimensions";
+import EmptyMessage from "../components/UI/EmptyMessage";
 
 const windowWidth = getWindowWidth();
 
@@ -19,20 +19,6 @@ export default function PecsScreen() {
   const [selectedCards, setSelectedCards] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    async function enableAudioInSilentMode() {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true, // 무음 모드에서 재생 가능하도록 설정
-        allowsRecordingIOS: false,
-        interruptionModeIOS: 0,
-        playsThroughEarpieceIOS: false,
-        shouldDuckAndroid: false,
-        interruptionModeAndroid: 1,
-      });
-    }
-    enableAudioInSilentMode();
-  }, []);
-
   useFocusEffect(
     useCallback(() => {
       setSelectedCards([]);
@@ -41,12 +27,12 @@ export default function PecsScreen() {
 
   function DrawSelectedCardList() {
     if (selectedCards.length === 0) {
-      return <Text>선택된 카드가 없습니다</Text>;
+      return <EmptyMessage text="  선택된 카드가 없습니다" />;
     }
 
     return selectedCards.map((item, index) => (
       <View style={styles.selectedCard} key={index}>
-        <Card item={item} onSelect={() => {}} cardSize={8} />
+        <Card item={item} onSelect={() => {}} cardSize={5.8} />
       </View>
     ));
   }
@@ -68,14 +54,11 @@ export default function PecsScreen() {
   };
 
   const PlayVoice = (text) => {
-    console.log("PlayVoice", text);
     if (!isPlaying) {
       setIsPlaying(true);
-      console.log("playvoice2", text);
       Speech.speak(text, {
         language: "ko-KR",
         onDone: () => {
-          console.log("playvoiceDone", text);
           setIsPlaying(false);
         },
       });
@@ -106,18 +89,18 @@ export default function PecsScreen() {
         <View style={styles.back}>
           <IconButton
             icon={"backspace-outline"}
-            size={40}
+            size={windowWidth / 10}
             color={"black"}
             onPress={BackHandler}
           />
         </View>
       </View>
 
-      <View style={styles.topContainer}>
+      <View style={styles.playContainer}>
         <View style={styles.play}>
           <IconButton
             icon={"play-circle-outline"}
-            size={40}
+            size={windowWidth / 10}
             color={"black"}
             onPress={PlayHandler}
           />
@@ -154,12 +137,12 @@ const styles = StyleSheet.create({
   topContainer: {
     height: windowWidth / 5,
     flexDirection: "row",
-    backgroundColor: "gray",
+    //backgroundColor: "gray",
   },
   selectedCardContainer: {
     flex: 6,
     flexDirection: "row",
-    backgroundColor: "red",
+    backgroundColor: "gray",
     alignItems: "center",
     justifyContent: "flex-start",
     margin: 7,
@@ -173,14 +156,22 @@ const styles = StyleSheet.create({
     alignContent: "center",
     justifyContent: "center",
   },
+  playContainer: {
+    height: windowWidth / 8,
+    flexDirection: "row",
+    backgroundColor: "lightgray",
+    marginBottom: 7,
+    marginHorizontal: 7,
+    borderRadius: 6,
+  },
   play: {
     flex: 1,
     flexDirection: "row",
     alignContent: "center",
     justifyContent: "center",
-    backgroundColor: "green",
-    margin: 7,
-    borderRadius: 6,
+    //backgroundColor: "green",
+    //margin: 7,
+    //borderRadius: 6,
   },
   bodyContainer: {
     flex: 1,

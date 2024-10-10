@@ -42,30 +42,22 @@ export default function Card({ item, cardSize }) {
 
   if (item.isFolder === true) {
     return (
-      <View style={styles.card}>
-        <View
-          style={[
-            styles.folderContainer,
-            {
-              width: windowWidth / cardSize - 10,
-              height: windowWidth / cardSize - 10,
-            },
-          ]}
-        >
+      <View
+        style={[
+          styles.card,
+          {
+            width: windowWidth / cardSize - 10,
+            height: windowWidth / cardSize - 10,
+          },
+        ]}
+      >
+        <View style={styles.folderContainer}>
           <View style={styles.folderTab}>
             <View style={styles.folderTabLeft} />
             <View style={styles.folderTabRight} />
           </View>
           <View style={styles.folderBody}>
-            <View
-              style={[
-                styles.imageContainer,
-                {
-                  width: windowWidth / cardSize - 40,
-                  height: windowWidth / cardSize - 40,
-                },
-              ]}
-            >
+            <View style={[styles.imageInFolderContainer]}>
               {imageUri === null ? (
                 <Text>Loading...</Text>
               ) : (
@@ -73,13 +65,7 @@ export default function Card({ item, cardSize }) {
                   source={{
                     uri: imageUri,
                   }}
-                  style={[
-                    styles.image,
-                    {
-                      width: windowWidth / cardSize - 40,
-                      height: windowWidth / cardSize - 40,
-                    },
-                  ]}
+                  style={[styles.image]}
                 />
               )}
             </View>
@@ -92,29 +78,20 @@ export default function Card({ item, cardSize }) {
     );
   } else {
     return (
-      <View style={styles.card}>
-        <View
-          style={[
-            styles.imageContainer,
-            {
-              width: windowWidth / cardSize - 10,
-              height: windowWidth / cardSize - 10,
-            },
-          ]}
-        >
+      <View
+        style={[
+          styles.card,
+          {
+            width: windowWidth / cardSize - 10,
+            height: windowWidth / cardSize - 10,
+          },
+        ]}
+      >
+        <View style={[styles.imageContainer]}>
           {imageUri === null ? (
             <Text>Loading...</Text>
           ) : (
-            <Image
-              source={{ uri: imageUri }}
-              style={[
-                styles.image,
-                {
-                  width: windowWidth / cardSize - 20,
-                  height: windowWidth / cardSize - 20,
-                },
-              ]}
-            />
+            <Image source={{ uri: imageUri }} style={[styles.image]} />
           )}
         </View>
         <View style={styles.title}>
@@ -124,14 +101,6 @@ export default function Card({ item, cardSize }) {
     );
   }
 }
-
-/*
-<Pressable
-        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-        onPress={() => onSelect(item)}
-      >
-</Pressable>
-*/
 
 const styles = StyleSheet.create({
   card: {
@@ -145,7 +114,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 1 },
     shadowRadius: 2,
     backgroundColor: "white",
-    margin: 4,
+    margin: 5,
   },
   pressed: {
     opacity: 0.8,
@@ -155,15 +124,17 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+    width: "90%",
+    //height: "90%",
+    marginTop: "5%",
   },
   folderTab: {
-    flex: 1,
+    //flex: 1,
+    height: "10%",
     flexDirection: "row",
   },
   folderTabLeft: {
     flex: 2,
-    marginTop: 6,
-    marginLeft: 8,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     backgroundColor: "#ffcc00",
@@ -174,8 +145,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   folderBody: {
-    flex: 5,
-    padding: 8,
+    flex: 1,
+    width: "100%",
     backgroundColor: "#ffcc00",
     borderTopRightRadius: 10,
     borderBottomLeftRadius: 10,
@@ -185,6 +156,8 @@ const styles = StyleSheet.create({
   },
   imageInFolderContainer: {
     borderRadius: 6,
+    width: "80%",
+    height: "80%",
     //overflow: "hidden",
   },
   imageContainer: {
@@ -194,15 +167,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+    width: "100%",
+    height: "100%",
   },
   image: {
     resizeMode: "cover",
+    overflow: "hidden",
+    width: "100%",
+    height: "100%",
   },
   title: {
     //flex: 1,
   },
   name: {
     fontWeight: "bold",
-    fontSize: 12,
+    fontSize: windowWidth / 35,
   },
 });

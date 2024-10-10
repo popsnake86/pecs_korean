@@ -87,24 +87,16 @@ export default function AddCardScreen({ navigation, route }) {
     }
 
     if (!isEditMode) {
-      await addCard(userID, cardName, imageUrl, isFolder, parent)
-        .then(() => {
-          storeStorage(userID, imageUrl);
-        })
-        .then(() => {
-          navigation.navigate("DeckManagementScreen");
-        });
+      await addCard(userID, cardName, imageUrl, isFolder, parent);
+      await storeStorage(userID, imageUrl);
+      navigation.navigate("DeckManagementScreen");
     } else {
-      await editCard(userID, cardId, cardName, imageUrl, parent)
-        .then(() => {
-          if (route.params.imageUrl !== imageUrl) {
-            storeStorage(userID, imageUrl);
-            deleteStorage(userID, route.params.imageUrl);
-          }
-        })
-        .then(() => {
-          navigation.navigate("DeckManagementScreen");
-        });
+      await editCard(userID, cardId, cardName, imageUrl, parent);
+      if (route.params.imageUrl !== imageUrl) {
+        await storeStorage(userID, imageUrl);
+        await deleteStorage(userID, route.params.imageUrl);
+      }
+      navigation.navigate("DeckManagementScreen");
     }
   }
 
@@ -117,8 +109,8 @@ export default function AddCardScreen({ navigation, route }) {
       },
       {
         text: "삭제",
-        onPress: () => {
-          deleteCard(cardId);
+        onPress: async () => {
+          await deleteCard(cardId);
           deleteStorage(userID, route.params.imageUrl);
           navigation.navigate("DeckManagementScreen");
         },

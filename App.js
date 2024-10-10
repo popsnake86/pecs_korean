@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, Text, Platform } from "react-native";
+import { Alert, SafeAreaView, StyleSheet, Text, Platform } from "react-native";
 import { enableScreens } from "react-native-screens";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 
 import LoginScreen from "./screens/LoginScreen";
@@ -24,6 +25,46 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  useEffect(() => {
+    async function enableAudioInSilentMode() {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        playsThroughEarpieceIOS: true,
+        allowsRecordingIOS: false,
+        interruptionModeIOS: 0,
+        playsThroughEarpieceIOS: false,
+        shouldDuckAndroid: false,
+        interruptionModeAndroid: 1,
+      });
+    }
+    enableAudioInSilentMode();
+  }, []);
+
+  useEffect(() => {
+    let soundObject;
+
+    async function playSilentSound() {
+      try {
+        soundObject = new Audio.Sound();
+        await soundObject.loadAsync(require("./assets/sound/nonesound.mp3"));
+        await soundObject.setIsLoopingAsync(true);
+        await soundObject.playAsync();
+      } catch (error) {
+        Alert.alert("playSilentSound error");
+        console.log("Error playing silent sound:", error);
+      }
+    }
+
+    playSilentSound();
+
+    // 컴포넌트가 unmount 될 때 무음 소리 정지
+    return () => {
+      if (soundObject) {
+        soundObject.unloadAsync();
+      }
+    };
+  }, []);
+
   const Root = () => {
     const [isTryingLogin, setIsTryingLogin] = useState(true);
 

@@ -1,4 +1,7 @@
 import { View, Text, TextInput, StyleSheet } from "react-native";
+import { getWindowWidth } from "../UI/Dimensions";
+
+const windowWidth = getWindowWidth();
 
 function Input({
   label,
@@ -34,6 +37,7 @@ const styles = StyleSheet.create({
   label: {
     color: "black",
     marginBottom: 4,
+    fontSize: windowWidth / 35,
   },
   labelInvalid: {
     color: "red",
@@ -41,9 +45,9 @@ const styles = StyleSheet.create({
   input: {
     paddingVertical: 8,
     paddingHorizontal: 6,
-    backgroundColor: "yellow",
+    backgroundColor: "lightgray",
     borderRadius: 4,
-    fontSize: 16,
+    fontSize: windowWidth / 35,
   },
   inputInvalid: {
     backgroundColor: "red",
