@@ -111,7 +111,14 @@ export default function ImagePicker({ onTakeImage, prevImage }) {
 
   return (
     <View>
-      <View style={styles.imagePreview}>{imagePreview}</View>
+      <View
+        style={[
+          styles.imagePreview,
+          windowWidth > 500 ? styles.sizeForPads : "",
+        ]}
+      >
+        {imagePreview}
+      </View>
       <OutlinedButton onPress={takeImageHandler} icon="camera">
         사진 촬영
       </OutlinedButton>
@@ -132,6 +139,10 @@ const styles = StyleSheet.create({
     backgroundColor: "gray",
     borderRadius: 4,
     overflow: "hidden",
+  },
+  sizeForPads: {
+    width: windowWidth / 2,
+    height: windowWidth / 2,
   },
   image: {
     width: "100%",

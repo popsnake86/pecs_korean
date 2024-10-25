@@ -15,6 +15,8 @@ import PecsScreen from "./screens/PecsScreen";
 import DeckManagementScreen from "./screens/DeckManagementScreen";
 import AddCardScreen from "./screens/AddCardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
+import SettingsVoiceScreen from "./screens/SettingsVoiceScreen";
+import SettingsLicenseScreen from "./screens/SettingsLicenseScreen";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 
 if (Platform.OS === "android") {
@@ -146,9 +148,9 @@ export default function App() {
           />
           <Tab.Screen
             name="Settings"
-            component={SettingsScreen}
+            component={SettingNavigator}
             options={{
-              title: "환경설정",
+              headerShown: false,
               tabBarLabel: "환경설정",
               tabBarIcon: () => (
                 <Ionicons name="settings-outline" size={20} color="black" />
@@ -175,6 +177,34 @@ export default function App() {
           component={AddCardScreen}
           options={{
             title: "카드 설정",
+          }}
+        />
+      </Stack.Navigator>
+    );
+  }
+
+  function SettingNavigator() {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen
+          name="SettingsScreen"
+          component={SettingsScreen}
+          options={{
+            title: "환경 설정",
+          }}
+        />
+        <Stack.Screen
+          name="SettingsVoiceScreen"
+          component={SettingsVoiceScreen}
+          options={{
+            title: "음성 설정",
+          }}
+        />
+        <Stack.Screen
+          name="SettingsLicenseScreen"
+          component={SettingsLicenseScreen}
+          options={{
+            title: "오픈소스 라이선스",
           }}
         />
       </Stack.Navigator>

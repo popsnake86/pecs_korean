@@ -1,24 +1,23 @@
 import { useContext } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import Constants from "expo-constants";
-
-import ModalSetting from "../components/ModalSetting";
-import OutlinedButton from "../components/UI/OutlinedButton";
+import { Ionicons } from "@expo/vector-icons";
 
 import { logout } from "../firebase/auth";
 import { AuthContext } from "../store/auth-context";
+import { getWindowWidth } from "../components/UI/Dimensions";
 
-export default function SettingsScreen() {
-  const licenses = require("../licenses.json");
+const windowWidth = getWindowWidth();
+
+export default function SettingsScreen({ navigation }) {
   const authCtx = useContext(AuthContext);
 
   let appVersion = "";
   try {
     appVersion = Constants.expoConfig?.version;
-    //appVersion = Constants.manifest2.extra.expoClient.version;
   } catch (error) {
     Alert.alert("appVersion error");
-    console.log(error);
+    console.error(error);
   }
 
   const handleLogout = async () => {
@@ -26,58 +25,47 @@ export default function SettingsScreen() {
       const result = await logout();
       authCtx.logout();
     } catch (error) {
-      Alert.alert("handleLogout error", error);
+      Alert.alert("handleLogout error");
+      console.error(error);
     }
   };
 
-  /*
- <TouchableOpacity
-        style={styles.settingItemContainer}
-        onPress={() => setGrammarModalVisible(true)}
-      >
-        <View style={styles.labelContainer}>
-          <Text style={styles.label1}>펙스 문법</Text>
-          <Text style={styles.label3}>
-            {grammarItems.length > 0 && grammarValue
-              ? grammarItems[parseInt(grammarValue) - 1].description
-              : ""}
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <ModalSetting
-        isVisible={grammarModalVisible}
-        title="펙스 문법"
-        items={grammarItems}
-        code={grammarValue}
-        onPress={(code) => {
-          setGrammarValue(code);
-          setGrammarModalVisible(false);
-        }}
-      />
-
-      <View style={styles.settingItemContainer}>
-        <View style={styles.labelContainer}>
-          <Text style={styles.label1}>반복 읽어주기</Text>
-          <Text style={styles.label3}>
-            음성재생 시 전체 문장을 한번 더 읽어줍니다
-          </Text>
-        </View>
-        <Switch value={readTwiceValue} onValueChange={setReadTwiceValue} />
-      </View>
-  */
-
   return (
     <View style={styles.container}>
-      <View style={styles.settingItemContainer}>
-        <OutlinedButton icon="log-out-outline" onPress={handleLogout}>
-          로그아웃
-        </OutlinedButton>
-      </View>
+      <Pressable onPress={handleLogout}>
+        <View style={styles.settingItemContainer}>
+          <Text style={styles.text}>로그아웃</Text>
+          <Ionicons name="chevron-forward-outline" size={windowWidth / 25} />
+        </View>
+      </Pressable>
+      <View style={styles.separator} />
 
+      <Pressable
+        onPress={() => {
+          navigation.navigate("SettingsVoiceScreen");
+        }}
+      >
+        <View style={styles.settingItemContainer}>
+          <Text style={styles.text}>음성 설정</Text>
+          <Ionicons name="chevron-forward-outline" size={windowWidth / 25} />
+        </View>
+      </Pressable>
+      <View style={styles.separator} />
+
+      <Pressable
+        onPress={() => {
+          navigation.navigate("SettingsLicenseScreen");
+        }}
+      >
+        <View style={styles.settingItemContainer}>
+          <Text style={styles.text}>오픈소스 라이선스</Text>
+          <Ionicons name="chevron-forward-outline" size={windowWidth / 25} />
+        </View>
+      </Pressable>
       <View style={styles.separator} />
 
       <View style={styles.infoItemContainer}>
-        <Text style={styles.label1}>PECS Korean 정보</Text>
+        <Text style={styles.text}>PECS Korean 정보</Text>
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>앱 버전</Text>
@@ -86,21 +74,6 @@ export default function SettingsScreen() {
       <View style={styles.infoItemContainer}>
         <Text style={styles.label2}>문의</Text>
         <Text style={styles.label3}>popsnake@hotmail.com</Text>
-      </View>
-      <View style={styles.infoItemContainer}>
-        <Text style={styles.label2}>오픈소스 라이선스</Text>
-        <ScrollView>
-          {Object.keys(licenses).map((key) => {
-            return (
-              <View key={key} style={styles.licenseContainer}>
-                <Text style={styles.packageName}>{key}</Text>
-                <Text style={styles.licenseType}>
-                  License: {licenses[key].licenses}
-                </Text>
-              </View>
-            );
-          })}
-        </ScrollView>
       </View>
     </View>
   );
@@ -114,49 +87,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 18,
     marginTop: 18,
   },
-  label1: {
-    fontSize: 18,
+  text: {
+    fontSize: windowWidth / 25,
     fontWeight: "bold",
   },
   label2: {
     marginTop: 5,
-    fontSize: 15,
+    fontSize: windowWidth / 27,
     fontWeight: "bold",
   },
   label3: {
     marginTop: 5,
-    fontSize: 12,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalLabel: {
-    marginBottom: 20,
-  },
-  modalTitleText: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  radioButtonItem: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
-  modalItemText: {
-    marginLeft: 10,
-    fontSize: 16,
+    fontSize: windowWidth / 27,
   },
   separator: {
     height: 1,
@@ -166,17 +108,5 @@ const styles = StyleSheet.create({
   infoItemContainer: {
     marginTop: 10,
     marginHorizontal: 18,
-  },
-  licenseContainer: {
-    marginBottom: 10,
-  },
-  packageName: {
-    fontWeight: "bold",
-    fontSize: 14,
-    marginTop: 5,
-  },
-  licenseType: {
-    fontStyle: "italic",
-    marginTop: 5,
   },
 });

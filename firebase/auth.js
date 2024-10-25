@@ -8,16 +8,20 @@ import {
 import { firebaseConfig } from "./firebase";
 import { auth } from "./firebase";
 
-export function createUser(email, password) {
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const token = userCredential._tokenResponse.idToken;
-      const userID = userCredential.user.uid;
-      return { token, userID };
-    })
-    .catch((error) => {
-      Alert.alert("createUserWithEmailAndPassword error", error);
-    });
+export async function createUser(email, password) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const token = userCredential._tokenResponse.idToken;
+    const userID = userCredential.user.uid;
+    return { token, userID };
+  } catch (error) {
+    Alert.alert("createUser error");
+    console.log(error);
+  }
 }
 
 export async function login(email, password) {

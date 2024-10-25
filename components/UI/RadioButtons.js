@@ -1,5 +1,8 @@
 import { Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { getWindowWidth } from "./Dimensions";
+
+const windowWidth = getWindowWidth();
 
 export default function RadioButtons({ items, code, onPress }) {
   return (
@@ -29,6 +32,6 @@ const styles = StyleSheet.create({
   },
   text: {
     marginLeft: 10,
-    fontSize: 16,
+    fontSize: windowWidth / 35,
   },
 });

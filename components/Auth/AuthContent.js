@@ -4,6 +4,9 @@ import { useNavigation } from "@react-navigation/native";
 
 import FlatButton from "../UI/FlatButton";
 import AuthForm from "./AuthForm";
+import { getWindowWidth } from "../UI/Dimensions";
+
+const windowWidth = getWindowWidth();
 
 function AuthContent({ isLogin, onAuthenticate }) {
   const navigation = useNavigation();
@@ -52,16 +55,23 @@ function AuthContent({ isLogin, onAuthenticate }) {
   }
 
   return (
-    <View style={styles.authContent}>
-      <AuthForm
-        isLogin={isLogin}
-        onSubmit={submitHandler}
-        credentialsInvalid={credentialsInvalid}
-      />
-      <View style={styles.buttons}>
-        <FlatButton onPress={switchAuthModeHandler}>
-          {isLogin ? "새 계정 만들기" : "로그인 하기"}
-        </FlatButton>
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.authContent,
+          windowWidth > 500 ? styles.subcontainerForPads : "",
+        ]}
+      >
+        <AuthForm
+          isLogin={isLogin}
+          onSubmit={submitHandler}
+          credentialsInvalid={credentialsInvalid}
+        />
+        <View style={styles.buttons}>
+          <FlatButton onPress={switchAuthModeHandler}>
+            {isLogin ? "새 계정 만들기" : "로그인 하기"}
+          </FlatButton>
+        </View>
       </View>
     </View>
   );
@@ -70,6 +80,11 @@ function AuthContent({ isLogin, onAuthenticate }) {
 export default AuthContent;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   authContent: {
     marginTop: 64,
     marginHorizontal: 32,
@@ -81,6 +96,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.35,
     shadowRadius: 4,
+    maxWidth: windowWidth * 0.9,
+    minWidth: windowWidth * 0.7,
+  },
+  subcontainerForPads: {
+    maxWidth: windowWidth * 0.7,
+    minWidth: windowWidth * 0.5,
   },
   buttons: {
     marginTop: 8,

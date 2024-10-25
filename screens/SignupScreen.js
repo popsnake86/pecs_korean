@@ -14,13 +14,9 @@ function SignupScreen() {
   async function signupHandler({ email, password }) {
     setIsAuthenticating(true);
     try {
-      const token = await createUser(email, password);
-      authCtx.authenticate(token);
+      const { token, userID } = await createUser(email, password);
+      authCtx.authenticate(token, userID);
     } catch (error) {
-      Alert.alert(
-        "인증 실패",
-        "계정을 생성할 수 없습니다. 입력값을 확인하시거나, 나중에 다시 시도해 주시기 바랍니다."
-      );
       setIsAuthenticating(false);
     }
   }

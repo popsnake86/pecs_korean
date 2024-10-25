@@ -2,6 +2,7 @@ import { Alert } from "react-native";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   setDoc,
   orderBy,
@@ -39,7 +40,7 @@ export const getCards = async (userID, parent) => {
     return result;
   } catch (error) {
     Alert.alert("getCards error:");
-    console.log(error);
+    console.error(error);
     return [];
   }
 };
@@ -149,6 +150,129 @@ export const getFolderList = async (userID) => {
     return result;
   } catch (error) {
     Alert.alert("getFolderList error");
+    console.log(error);
+  }
+};
+
+export const getSpeechRateList = async () => {
+  try {
+    const ref = collection(db, "settings/list/speechRate");
+    const querySnapshot = await getDocs(ref);
+
+    let result = [];
+    querySnapshot.forEach((item) => {
+      result.push({
+        code: item.id,
+        description: item.data().description,
+      });
+    });
+    return result;
+  } catch (error) {
+    Alert.alert("getSpeechRateList error:");
+    console.error(error);
+    return [];
+  }
+};
+
+export const getSpeechRate = async (userID) => {
+  try {
+    const ref = doc(db, "settings", userID);
+    const result = await getDoc(ref);
+    return result.data().speechRate;
+  } catch (error) {
+    Alert.alert("getSpeechRate error");
+    console.log(error);
+  }
+};
+
+export const editSpeechRate = async (userID, speechRate) => {
+  try {
+    const ref = doc(db, "settings", userID);
+    await setDoc(ref, { speechRate: speechRate }, { merge: true });
+  } catch (error) {
+    Alert.alert("setSpeechRate error");
+    console.log(error);
+  }
+};
+
+export const getSpeechPitchList = async () => {
+  try {
+    const ref = collection(db, "settings/list/speechPitch");
+    const querySnapshot = await getDocs(ref);
+
+    let result = [];
+    querySnapshot.forEach((item) => {
+      result.push({
+        code: item.id,
+        description: item.data().description,
+      });
+    });
+    return result;
+  } catch (error) {
+    Alert.alert("getSpeechPitchList error:");
+    console.error(error);
+    return [];
+  }
+};
+
+export const getSpeechPitch = async (userID) => {
+  try {
+    const ref = doc(db, "settings", userID);
+    const result = await getDoc(ref);
+    return result.data().speechPitch;
+  } catch (error) {
+    Alert.alert("getSpeechPitch error");
+    console.log(error);
+  }
+};
+
+export const editSpeechPitch = async (userID, speechPitch) => {
+  try {
+    const ref = doc(db, "settings", userID);
+    await setDoc(ref, { speechPitch: speechPitch }, { merge: true });
+  } catch (error) {
+    Alert.alert("setSpeechPitch error");
+    console.log(error);
+  }
+};
+
+export const getSpeechVolumeList = async () => {
+  try {
+    const ref = collection(db, "settings/list/speechVolume");
+    const querySnapshot = await getDocs(ref);
+
+    let result = [];
+    querySnapshot.forEach((item) => {
+      result.push({
+        code: item.id,
+        description: item.data().description,
+      });
+    });
+    return result;
+  } catch (error) {
+    Alert.alert("getSpeechVolumeList error:");
+    console.error(error);
+    return [];
+  }
+};
+
+export const getSpeechVolume = async (userID) => {
+  try {
+    const ref = doc(db, "settings", userID);
+    const result = await getDoc(ref);
+    return result.data().speechVolume;
+  } catch (error) {
+    Alert.alert("getSpeechVolume error");
+    console.log(error);
+  }
+};
+
+export const editSpeechVolume = async (userID, speechVolume) => {
+  try {
+    const ref = doc(db, "settings", userID);
+    await setDoc(ref, { speechVolume: speechVolume }, { merge: true });
+  } catch (error) {
+    Alert.alert("setSpeechVolume error");
     console.log(error);
   }
 };

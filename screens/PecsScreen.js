@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
 import * as Speech from "expo-speech";
@@ -11,18 +11,63 @@ import IconButton from "../components/UI/IconButton";
 import { getWindowWidth } from "../components/UI/Dimensions";
 import EmptyMessage from "../components/UI/EmptyMessage";
 
+import { AuthContext } from "../store/auth-context";
+import {
+  getSpeechRate,
+  getSpeechPitch,
+  getSpeechVolume,
+} from "../firebase/firestore";
+
 const windowWidth = getWindowWidth();
 
 export default function PecsScreen() {
+  const authCtx = useContext(AuthContext);
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [isModalFolderVisible, setIsModalFolderVisible] = useState(false);
   const [selectedCards, setSelectedCards] = useState([]);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayingIndex, setIsPlayingIndex] = useState(null);
+  const [speechRate, setSpeechRate] = useState(1.0);
+  const [speechPitch, setSpeechPitch] = useState(1.0);
+  const [speechVolume, setSpeechVolume] = useState(1.0);
 
   useFocusEffect(
     useCallback(() => {
       setSelectedCards([]);
     }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const getSpeechRateFromFirestore = async () => {
+        try {
+          const result = await getSpeechRate(authCtx.userID);
+          setSpeechRate(Number(result));
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      const getSpeechPitchFromFirestore = async () => {
+        try {
+          const result = await getSpeechPitch(authCtx.userID);
+          setSpeechPitch(Number(result));
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      const getSpeechVolumeFromFirestore = async () => {
+        try {
+          const result = await getSpeechVolume(authCtx.userID);
+          setSpeechVolume(Number(result));
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      if (authCtx.userID) {
+        getSpeechRateFromFirestore();
+        getSpeechPitchFromFirestore();
+        getSpeechVolumeFromFirestore();
+      }
+    }, [authCtx.userID])
   );
 
   function DrawSelectedCardList() {
@@ -31,7 +76,13 @@ export default function PecsScreen() {
     }
 
     return selectedCards.map((item, index) => (
-      <View style={styles.selectedCard} key={index}>
+      <View
+        style={[
+          styles.selectedCard,
+          isPlayingIndex === index && styles.playingCard,
+        ]}
+        key={index}
+      >
         <Card item={item} onSelect={() => {}} cardSize={5.8} />
       </View>
     ));
@@ -43,26 +94,28 @@ export default function PecsScreen() {
     }
   }, [selectedCards]);
 
-  const PlayHandler = () => {
+  const PlayHandler = async () => {
     if (selectedCards.length >= 1) {
-      let text = "";
-      selectedCards.forEach((item) => {
-        text = text + item.cardName + " ";
-      });
-      PlayVoice(text);
+      for (const [index, item] of selectedCards.entries()) {
+        await PlayVoice(item.cardName, index);
+      }
     }
   };
 
-  const PlayVoice = (text) => {
-    if (!isPlaying) {
-      setIsPlaying(true);
+  const PlayVoice = (text, index) => {
+    return new Promise((resolve) => {
+      setIsPlayingIndex(index);
       Speech.speak(text, {
         language: "ko-KR",
+        rate: speechRate,
+        pitch: speechPitch,
+        volume: speechVolume,
         onDone: () => {
-          setIsPlaying(false);
+          setIsPlayingIndex(null);
+          resolve();
         },
       });
-    }
+    });
   };
 
   const cardSelectHandler = useCallback(
@@ -71,13 +124,14 @@ export default function PecsScreen() {
         setSelectedFolder(item.cardId);
         setIsModalFolderVisible(true);
       } else {
-        if (selectedCards.length < 5 && !isPlaying) {
-          setSelectedCards((prevCards) => [...prevCards, item]);
-          PlayVoice(item.cardName);
+        if (selectedCards.length < 5 && isPlayingIndex === null) {
+          const newCard = { ...item, isPlaying: false };
+          setSelectedCards((prevCards) => [...prevCards, newCard]);
+          PlayVoice(item.cardName, selectedCards.length);
         }
       }
     },
-    [selectedCards, isPlaying]
+    [selectedCards, isPlayingIndex, speechRate, speechPitch, speechVolume]
   );
 
   return (
@@ -137,7 +191,6 @@ const styles = StyleSheet.create({
   topContainer: {
     height: windowWidth / 5,
     flexDirection: "row",
-    //backgroundColor: "gray",
   },
   selectedCardContainer: {
     flex: 6,
@@ -150,6 +203,10 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     width: windowWidth / 6,
+  },
+  playingCard: {
+    opacity: 0.8,
+    backgroundColor: "green",
   },
   back: {
     flex: 1,
@@ -169,9 +226,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignContent: "center",
     justifyContent: "center",
-    //backgroundColor: "green",
-    //margin: 7,
-    //borderRadius: 6,
   },
   bodyContainer: {
     flex: 1,

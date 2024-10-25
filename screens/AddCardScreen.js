@@ -11,7 +11,7 @@ import {
 import ImagePicker from "../components/ImagePicker";
 import OutlinedButton from "../components/UI/OutlinedButton";
 import RadioButtons from "../components/UI/RadioButtons";
-
+import { getWindowWidth } from "../components/UI/Dimensions";
 import {
   addCard,
   deleteCard,
@@ -20,6 +20,8 @@ import {
 } from "../firebase/firestore";
 import { storeStorage, deleteStorage } from "../firebase/storage";
 import { AuthContext } from "../store/auth-context";
+
+const windowWidth = getWindowWidth();
 
 export default function AddCardScreen({ navigation, route }) {
   const authCtx = useContext(AuthContext);
@@ -119,33 +121,46 @@ export default function AddCardScreen({ navigation, route }) {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View>
-        <Text style={styles.label}>{isFolder ? "폴더 이름" : "카드 이름"}</Text>
-        <TextInput
-          value={cardName}
-          onChangeText={setCardName}
-          style={styles.input}
-        />
-      </View>
-      <ImagePicker onTakeImage={takeImageHandler} prevImage={imageUrl} />
+    <View style={styles.container}>
+      <ScrollView
+        style={[
+          styles.scrollView,
+          windowWidth > 500 ? styles.containerForPads : "",
+        ]}
+      >
+        <View>
+          <Text style={styles.label}>
+            {isFolder ? "폴더 이름" : "카드 이름"}
+          </Text>
+          <TextInput
+            value={cardName}
+            onChangeText={setCardName}
+            style={styles.input}
+          />
+        </View>
+        <ImagePicker onTakeImage={takeImageHandler} prevImage={imageUrl} />
 
-      {!isFolder && folderList.length > 0 ? <DrawFolderRadioButtonList /> : ""}
+        {!isFolder && folderList.length > 0 ? (
+          <DrawFolderRadioButtonList />
+        ) : (
+          ""
+        )}
 
-      <OutlinedButton onPress={saveHandler} icon="save">
-        {!isEditMode ? (isFolder ? "폴더 생성" : "카드 생성") : "카드 변경"}
-      </OutlinedButton>
-
-      {isEditMode ? (
-        <OutlinedButton onPress={deleteHandler} icon="trash-outline">
-          {isFolder ? "폴더 삭제" : "카드 삭제"}
+        <OutlinedButton onPress={saveHandler} icon="save">
+          {!isEditMode ? (isFolder ? "폴더 생성" : "카드 생성") : "카드 변경"}
         </OutlinedButton>
-      ) : (
-        ""
-      )}
 
-      <View style={styles.marginBottom} />
-    </ScrollView>
+        {isEditMode ? (
+          <OutlinedButton onPress={deleteHandler} icon="trash-outline">
+            {isFolder ? "폴더 삭제" : "카드 삭제"}
+          </OutlinedButton>
+        ) : (
+          ""
+        )}
+
+        <View style={styles.marginBottom} />
+      </ScrollView>
+    </View>
   );
 }
 
@@ -153,16 +168,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  containerForPads: {
+    maxWidth: windowWidth * 0.7,
+    minWidth: windowWidth * 0.5,
   },
   label: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: windowWidth / 35,
   },
   input: {
     marginVertical: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    fontSize: 16,
+    fontSize: windowWidth / 35,
     borderBottomWidth: 2,
     backgroundColor: "orange",
   },

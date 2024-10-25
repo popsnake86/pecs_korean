@@ -1,5 +1,12 @@
 import { useContext, useCallback, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { DraggableGrid } from "react-native-draggable-grid";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -32,6 +39,11 @@ export default function CardList({ onSelect, numColumns, parent, isEditMode }) {
     }, [authCtx.userID, parent])
   );
 
+  const handleDragRelease = (updatedItems) => {
+    const reOrderedItems = reOrder(updatedItems);
+    setData(reOrderedItems);
+  };
+
   const reOrder = (items) => {
     let result = items;
     let index = 0;
@@ -49,19 +61,20 @@ export default function CardList({ onSelect, numColumns, parent, isEditMode }) {
     return <EmptyMessage text="데이터를 불러오는 중입니다..." />;
   }
 
+  if (data.length < 1) {
+    return <EmptyMessage text="카드가 없습니다" />;
+  }
+
   return (
     <View style={styles.view}>
-      {data.length < 1 ? (
-        <EmptyMessage text="카드가 없습니다" />
-      ) : (
+      {isEditMode ? (
         <ScrollView>
           <DraggableGrid
             data={data}
             keyExtractor={(item) => item.key}
             numColumns={numColumns}
-            disabledDrag={!isEditMode}
             delayLongPress={1000}
-            renderItem={(gridItem, drag, isActive) => (
+            renderItem={(gridItem) => (
               <View>
                 <Card item={gridItem} cardSize={4} />
               </View>
@@ -69,12 +82,28 @@ export default function CardList({ onSelect, numColumns, parent, isEditMode }) {
             onItemPress={(item) => {
               onSelect(item);
             }}
-            onDragRelease={(updatedItems) => {
-              const reOrderedItems = reOrder(updatedItems);
-              setData(reOrderedItems);
+            onDragRelease={(changedItem) => {
+              handleDragRelease(changedItem);
             }}
           />
         </ScrollView>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.key}
+          numColumns={numColumns}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => {
+                onSelect(item);
+              }}
+            >
+              <View>
+                <Card item={item} cardSize={4} />
+              </View>
+            </Pressable>
+          )}
+        />
       )}
     </View>
   );
