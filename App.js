@@ -17,6 +17,7 @@ import AddCardScreen from "./screens/AddCardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import SettingsVoiceScreen from "./screens/SettingsVoiceScreen";
 import SettingsLicenseScreen from "./screens/SettingsLicenseScreen";
+import RNGH from "./screens/RNGH";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 
 if (Platform.OS === "android") {
@@ -205,6 +206,13 @@ export default function App() {
           component={SettingsLicenseScreen}
           options={{
             title: "오픈소스 라이선스",
+          }}
+        />
+        <Stack.Screen
+          name="RNGH"
+          component={RNGH}
+          options={{
+            title: "실험실",
           }}
         />
       </Stack.Navigator>

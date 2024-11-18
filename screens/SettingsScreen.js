@@ -64,6 +64,18 @@ export default function SettingsScreen({ navigation }) {
       </Pressable>
       <View style={styles.separator} />
 
+      <Pressable
+        onPress={() => {
+          navigation.navigate("RNGH");
+        }}
+      >
+        <View style={styles.settingItemContainer}>
+          <Text style={styles.text}>실험실</Text>
+          <Ionicons name="chevron-forward-outline" size={windowWidth / 25} />
+        </View>
+      </Pressable>
+      <View style={styles.separator} />
+
       <View style={styles.infoItemContainer}>
         <Text style={styles.text}>PECS Korean 정보</Text>
       </View>

@@ -121,7 +121,7 @@ export default function PecsScreen() {
   const cardSelectHandler = useCallback(
     (item) => {
       if (item.isFolder === true) {
-        setSelectedFolder(item.cardId);
+        setSelectedFolder(item);
         setIsModalFolderVisible(true);
       } else {
         if (selectedCards.length < 5 && isPlayingIndex === null) {

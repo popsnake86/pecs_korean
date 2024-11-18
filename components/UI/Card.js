@@ -38,7 +38,7 @@ export default function Card({ item, cardSize }) {
     };
 
     cacheImage();
-  }, []);
+  }, [item.imageUrl]);
 
   if (item.isFolder === true) {
     return (

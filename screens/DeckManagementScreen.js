@@ -14,7 +14,7 @@ export default function DeckManagementScreen({ navigation }) {
 
   function cardSelectHandler(item) {
     if (item.isFolder === true) {
-      setSelectedFolder(item.cardId);
+      setSelectedFolder(item);
       setIsModalFolderVisible(true);
     } else {
       setIsModalFolderVisible(false);
@@ -36,6 +36,17 @@ export default function DeckManagementScreen({ navigation }) {
       cardName: item.cardName,
       imageUrl: item.imageUrl,
       parent: item.parent,
+      isFolder: item.isFolder,
+      isEditMode: true,
+    });
+  }
+
+  function editFolderHandler(item) {
+    navigation.navigate("AddCardScreen", {
+      cardId: item.cardId,
+      cardName: item.cardName,
+      imageUrl: item.imageUrl,
+      parent: "",
       isFolder: item.isFolder,
       isEditMode: true,
     });
@@ -69,6 +80,7 @@ export default function DeckManagementScreen({ navigation }) {
       <ModalFolder
         isVisible={isModalFolderVisible}
         parent={selectedFolder}
+        onEdit={editFolderHandler}
         onPress={cardSelectHandler}
         onClose={() => {
           setIsModalFolderVisible(false);

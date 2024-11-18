@@ -60,7 +60,7 @@ export const addCard = async (userID, cardName, imageUrl, isFolder, parent) => {
     });
   } catch (error) {
     Alert.alert("addCard error");
-    console.log("addCard error", error);
+    console.error("addCard error", error);
   }
 };
 
@@ -73,12 +73,12 @@ export const editCard = async (userID, cardId, cardName, imageUrl, parent) => {
       cardName: cardName,
       imageUrl: fileName,
       parent: parent,
-      isFolder: false,
+      //isFolder: false,
       order: order + 1,
     });
   } catch (error) {
     Alert.alert("editCard error");
-    console.log("editCard error", error);
+    console.error("editCard error", error);
   }
 };
 
@@ -98,7 +98,7 @@ export const updateOrder = async (cardId, order) => {
     await setDoc(cardRef, { order: order }, { merge: true });
   } catch (error) {
     Alert.alert("updateOrder error");
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -124,7 +124,7 @@ const getLastOrderNumber = async (userID, parent) => {
     return order;
   } catch (error) {
     Alert.alert("getLastOrderNumber error");
-    console.log(error);
+    console.error(error);
     return 9999;
   }
 };
@@ -150,7 +150,23 @@ export const getFolderList = async (userID) => {
     return result;
   } catch (error) {
     Alert.alert("getFolderList error");
-    console.log(error);
+    console.error(error);
+  }
+};
+
+export const isEmptyUnderTheFolder = async (userID, parent) => {
+  try {
+    const q = query(
+      collection(db, "cards"),
+      where("userID", "==", userID),
+      where("parent", "==", parent)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.empty;
+  } catch (error) {
+    Alert.alert("isEmptyUnderTheFolder error");
+    console.error(error);
+    return false;
   }
 };
 
@@ -181,7 +197,7 @@ export const getSpeechRate = async (userID) => {
     return result.data().speechRate;
   } catch (error) {
     Alert.alert("getSpeechRate error");
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -191,7 +207,7 @@ export const editSpeechRate = async (userID, speechRate) => {
     await setDoc(ref, { speechRate: speechRate }, { merge: true });
   } catch (error) {
     Alert.alert("setSpeechRate error");
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -222,7 +238,7 @@ export const getSpeechPitch = async (userID) => {
     return result.data().speechPitch;
   } catch (error) {
     Alert.alert("getSpeechPitch error");
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -232,7 +248,7 @@ export const editSpeechPitch = async (userID, speechPitch) => {
     await setDoc(ref, { speechPitch: speechPitch }, { merge: true });
   } catch (error) {
     Alert.alert("setSpeechPitch error");
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -263,7 +279,7 @@ export const getSpeechVolume = async (userID) => {
     return result.data().speechVolume;
   } catch (error) {
     Alert.alert("getSpeechVolume error");
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -273,6 +289,6 @@ export const editSpeechVolume = async (userID, speechVolume) => {
     await setDoc(ref, { speechVolume: speechVolume }, { merge: true });
   } catch (error) {
     Alert.alert("setSpeechVolume error");
-    console.log(error);
+    console.error(error);
   }
 };

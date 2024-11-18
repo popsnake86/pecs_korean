@@ -1,4 +1,12 @@
-import { Modal, Text, StyleSheet, View, ScrollView } from "react-native";
+import {
+  Modal,
+  Text,
+  StyleSheet,
+  View,
+  ScrollView,
+  Pressable,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import CardList from "./UI/CardList";
 import IconButton from "./UI/IconButton";
 import { getWindowWidth } from "./UI/Dimensions";
@@ -8,6 +16,7 @@ const windowWidth = getWindowWidth();
 export default function ModalFolder({
   isVisible,
   parent,
+  onEdit,
   onPress,
   onClose,
   isEditMode,
@@ -22,7 +31,22 @@ export default function ModalFolder({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalLabel}>
-            <Text style={styles.modalTitleText}></Text>
+            {isEditMode ? (
+              <Pressable
+                onPress={() => {
+                  onEdit(parent);
+                  onClose();
+                }}
+              >
+                <Ionicons name="create-outline" size={windowWidth / 10} />
+              </Pressable>
+            ) : (
+              <View />
+            )}
+
+            <Text style={styles.modalTitleText}>
+              {parent && parent.cardName}
+            </Text>
             <IconButton
               icon={"close-circle-outline"}
               size={windowWidth / 10}
@@ -34,7 +58,7 @@ export default function ModalFolder({
             <CardList
               onSelect={onPress}
               numColumns={3}
-              parent={parent}
+              parent={parent && parent.cardId}
               isEditMode={isEditMode}
             />
           </View>
@@ -68,12 +92,12 @@ const styles = StyleSheet.create({
   },
   modalLabel: {
     flexDirection: "row",
-    //alignItems: "center",
+    alignItems: "center",
     justifyContent: "space-between",
     //marginBottom: 20,
   },
   modalTitleText: {
-    fontSize: 18,
+    fontSize: windowWidth / 15,
     fontWeight: "bold",
   },
   modalBody: {

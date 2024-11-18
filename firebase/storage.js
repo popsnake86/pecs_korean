@@ -32,7 +32,7 @@ export async function storeStorage(userID, image) {
       });
   } catch (error) {
     Alert.alert("storeStorage Error");
-    console.log(error);
+    console.error(error);
   }
 }
 
@@ -46,6 +46,6 @@ export async function deleteStorage(userID, image) {
     });
   } catch (error) {
     Alert.alert("storeStorage Error");
-    console.log(error);
+    console.error(error);
   }
 }

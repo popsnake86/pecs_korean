@@ -17,6 +17,7 @@ import {
   deleteCard,
   editCard,
   getFolderList,
+  isEmptyUnderTheFolder,
 } from "../firebase/firestore";
 import { storeStorage, deleteStorage } from "../firebase/storage";
 import { AuthContext } from "../store/auth-context";
@@ -34,6 +35,7 @@ export default function AddCardScreen({ navigation, route }) {
   const isFolder = route.params.isFolder;
   const [parent, setParent] = useState(route.params.parent);
   const [folderList, setFolderList] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const setFolderRadioButtonList = async () => {
@@ -88,6 +90,11 @@ export default function AddCardScreen({ navigation, route }) {
       return;
     }
 
+    if (isSaving) {
+      return;
+    }
+    setIsSaving(true);
+
     if (!isEditMode) {
       await addCard(userID, cardName, imageUrl, isFolder, parent);
       await storeStorage(userID, imageUrl);
@@ -100,9 +107,14 @@ export default function AddCardScreen({ navigation, route }) {
       }
       navigation.navigate("DeckManagementScreen");
     }
+    setIsSaving(false);
   }
 
   async function deleteHandler() {
+    if (isSaving) {
+      return;
+    }
+
     Alert.alert("카드 삭제", "정말로 삭제하시겠습니까?", [
       {
         text: "취소",
@@ -112,9 +124,21 @@ export default function AddCardScreen({ navigation, route }) {
       {
         text: "삭제",
         onPress: async () => {
+          setIsSaving(true);
+
+          if (isFolder) {
+            const isEmpty = await isEmptyUnderTheFolder(userID, cardId);
+            if (!isEmpty) {
+              Alert.alert("오류", "비어있지 않은 폴더는 삭제할 수 없습니다");
+              setIsSaving(false);
+              return;
+            }
+          }
+
           await deleteCard(cardId);
-          deleteStorage(userID, route.params.imageUrl);
+          await deleteStorage(userID, route.params.imageUrl);
           navigation.navigate("DeckManagementScreen");
+          setIsSaving(false);
         },
       },
     ]);
@@ -147,7 +171,13 @@ export default function AddCardScreen({ navigation, route }) {
         )}
 
         <OutlinedButton onPress={saveHandler} icon="save">
-          {!isEditMode ? (isFolder ? "폴더 생성" : "카드 생성") : "카드 변경"}
+          {!isEditMode
+            ? isFolder
+              ? "폴더 생성"
+              : "카드 생성"
+            : isFolder
+            ? "폴더 변경"
+            : "카드 변경"}
         </OutlinedButton>
 
         {isEditMode ? (
