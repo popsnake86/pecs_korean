@@ -124,7 +124,11 @@ export default function PecsScreen() {
         setSelectedFolder(item);
         setIsModalFolderVisible(true);
       } else {
-        if (selectedCards.length < 5 && isPlayingIndex === null) {
+        if (
+          selectedCards.length < 5 &&
+          isPlayingIndex === null &&
+          item.isEnabled === true
+        ) {
           const newCard = { ...item, isPlaying: false };
           setSelectedCards((prevCards) => [...prevCards, newCard]);
           PlayVoice(item.cardName, selectedCards.length);

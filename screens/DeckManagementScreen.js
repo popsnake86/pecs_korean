@@ -37,6 +37,8 @@ export default function DeckManagementScreen({ navigation }) {
       imageUrl: item.imageUrl,
       parent: item.parent,
       isFolder: item.isFolder,
+      isEnabled: item.isEnabled,
+      order: item.order,
       isEditMode: true,
     });
   }

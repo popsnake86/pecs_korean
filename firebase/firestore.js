@@ -1,6 +1,7 @@
 import { Alert } from "react-native";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -10,7 +11,7 @@ import {
   query,
   updateDoc,
   where,
-  deleteDoc,
+  writeBatch,
 } from "firebase/firestore";
 
 import { db } from "./firebase";
@@ -34,6 +35,7 @@ export const getCards = async (userID, parent) => {
         imageUrl: item.data().imageUrl,
         parent: item.data().parent,
         isFolder: item.data().isFolder,
+        isEnabled: item.data().isEnabled,
         order: item.data().order,
       });
     });
@@ -45,10 +47,18 @@ export const getCards = async (userID, parent) => {
   }
 };
 
-export const addCard = async (userID, cardName, imageUrl, isFolder, parent) => {
+export const addCard = async (
+  userID,
+  cardName,
+  imageUrl,
+  isFolder,
+  isEnabled,
+  parent,
+  order
+) => {
   try {
     const fileName = imageUrl.split("/").pop();
-    const order = await getLastOrderNumber(userID, parent);
+    //const order = await getLastOrderNumber(userID, parent);
 
     const result = await setDoc(doc(collection(db, "cards")), {
       userID: userID,
@@ -56,7 +66,9 @@ export const addCard = async (userID, cardName, imageUrl, isFolder, parent) => {
       imageUrl: fileName,
       isFolder: isFolder,
       parent: parent,
-      order: order + 1,
+      //order: order + 1,
+      order: order,
+      isEnabled: isEnabled,
     });
   } catch (error) {
     Alert.alert("addCard error");
@@ -64,17 +76,26 @@ export const addCard = async (userID, cardName, imageUrl, isFolder, parent) => {
   }
 };
 
-export const editCard = async (userID, cardId, cardName, imageUrl, parent) => {
+export const editCard = async (
+  userID,
+  cardId,
+  cardName,
+  imageUrl,
+  isEnabled,
+  parent,
+  order
+) => {
   try {
     const fileName = imageUrl.split("/").pop();
-    const order = await getLastOrderNumber(userID, parent);
+    //const order = await getLastOrderNumber(userID, parent);
 
     const result = await updateDoc(doc(db, "cards", cardId), {
       cardName: cardName,
       imageUrl: fileName,
       parent: parent,
-      //isFolder: false,
-      order: order + 1,
+      //order: order + 1,
+      order: order,
+      isEnabled: isEnabled,
     });
   } catch (error) {
     Alert.alert("editCard error");
@@ -82,13 +103,31 @@ export const editCard = async (userID, cardId, cardName, imageUrl, parent) => {
   }
 };
 
+export const massEditCard = async () => {
+  try {
+    const batch = writeBatch(db);
+    const ref = collection(db, "cards");
+
+    const querySnapshot = await getDocs(ref);
+    querySnapshot.forEach((docSnapshot) => {
+      const docRef = doc(db, "cards", docSnapshot.id);
+      batch.update(docRef, { isEnabled: true });
+    });
+
+    await batch.commit();
+  } catch (error) {
+    console.error("massEditCard error", error);
+  }
+};
+//massEditCard();
+
 export const deleteCard = async (cardId) => {
   try {
     const cardRef = doc(db, "cards", cardId);
     await deleteDoc(cardRef);
   } catch (error) {
     Alert.alert("deleteCard error");
-    console.log("deleteCard error", error);
+    console.error("deleteCard error", error);
   }
 };
 
@@ -102,7 +141,7 @@ export const updateOrder = async (cardId, order) => {
   }
 };
 
-const getLastOrderNumber = async (userID, parent) => {
+export const getLastOrderNumber = async (userID, parent) => {
   try {
     let order = 0;
 
@@ -121,7 +160,7 @@ const getLastOrderNumber = async (userID, parent) => {
     querySnapshot.forEach((item) => {
       order = item.data().order;
     });
-    return order;
+    return order + 1;
   } catch (error) {
     Alert.alert("getLastOrderNumber error");
     console.error(error);

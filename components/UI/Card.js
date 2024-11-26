@@ -93,6 +93,11 @@ export default function Card({ item, cardSize }) {
           ) : (
             <Image source={{ uri: imageUri }} style={[styles.image]} />
           )}
+          {!item.isEnabled && (
+            <View style={styles.overlay}>
+              <Text style={styles.cross}>X</Text>
+            </View>
+          )}
         </View>
         <View style={styles.title}>
           <Text style={styles.name}>{item.cardName}</Text>
@@ -175,6 +180,21 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
     height: "100%",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // 반투명 검은 배경
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cross: {
+    color: "red",
+    fontSize: windowWidth / 6,
+    fontWeight: "bold",
   },
   title: {
     //flex: 1,

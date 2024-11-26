@@ -3,6 +3,7 @@ import {
   Alert,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -17,6 +18,7 @@ import {
   deleteCard,
   editCard,
   getFolderList,
+  getLastOrderNumber,
   isEmptyUnderTheFolder,
 } from "../firebase/firestore";
 import { storeStorage, deleteStorage } from "../firebase/storage";
@@ -33,7 +35,9 @@ export default function AddCardScreen({ navigation, route }) {
   const [cardName, setCardName] = useState(route.params.cardName);
   const [imageUrl, setImageUrl] = useState(route.params.imageUrl);
   const isFolder = route.params.isFolder;
+  const [isEnabled, setIsEnabled] = useState(route.params.isEnabled ?? true);
   const [parent, setParent] = useState(route.params.parent);
+  const order = route.params.order;
   const [folderList, setFolderList] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -63,6 +67,7 @@ export default function AddCardScreen({ navigation, route }) {
   function DrawFolderRadioButtonList() {
     return (
       <>
+        <View style={styles.separator} />
         <Text style={styles.label}>소속 폴더</Text>
         <RadioButtons
           items={folderList}
@@ -71,6 +76,23 @@ export default function AddCardScreen({ navigation, route }) {
             setParent(code);
           }}
         />
+      </>
+    );
+  }
+
+  function DrawEnableButton() {
+    return (
+      <>
+        <View style={styles.separator} />
+        <View style={styles.switch}>
+          <Text style={styles.label}>활성화</Text>
+          <Switch
+            onValueChange={() => {
+              setIsEnabled((previousState) => !previousState);
+            }}
+            value={isEnabled}
+          />
+        </View>
       </>
     );
   }
@@ -96,11 +118,42 @@ export default function AddCardScreen({ navigation, route }) {
     setIsSaving(true);
 
     if (!isEditMode) {
-      await addCard(userID, cardName, imageUrl, isFolder, parent);
+      const newOrder = await getLastOrderNumber(userID, parent);
+      await addCard(
+        userID,
+        cardName,
+        imageUrl,
+        isFolder,
+        isEnabled,
+        parent,
+        newOrder
+      );
       await storeStorage(userID, imageUrl);
       navigation.navigate("DeckManagementScreen");
     } else {
-      await editCard(userID, cardId, cardName, imageUrl, parent);
+      if (parent === route.params.parent) {
+        await editCard(
+          userID,
+          cardId,
+          cardName,
+          imageUrl,
+          isEnabled,
+          parent,
+          order
+        );
+      } else {
+        const newOrder = await getLastOrderNumber(userID, parent);
+        await editCard(
+          userID,
+          cardId,
+          cardName,
+          imageUrl,
+          isEnabled,
+          parent,
+          newOrder
+        );
+      }
+
       if (route.params.imageUrl !== imageUrl) {
         await storeStorage(userID, imageUrl);
         await deleteStorage(userID, route.params.imageUrl);
@@ -165,11 +218,22 @@ export default function AddCardScreen({ navigation, route }) {
         <ImagePicker onTakeImage={takeImageHandler} prevImage={imageUrl} />
 
         {!isFolder && folderList.length > 0 ? (
-          <DrawFolderRadioButtonList />
+          <>
+            <DrawFolderRadioButtonList />
+          </>
         ) : (
           ""
         )}
 
+        {!isFolder ? (
+          <>
+            <DrawEnableButton />
+          </>
+        ) : (
+          ""
+        )}
+
+        <View style={styles.separator} />
         <OutlinedButton onPress={saveHandler} icon="save">
           {!isEditMode
             ? isFolder
@@ -225,5 +289,15 @@ const styles = StyleSheet.create({
   },
   marginBottom: {
     marginBottom: 40,
+  },
+  separator: {
+    height: 1,
+    marginVertical: 15,
+    backgroundColor: "#ccc",
+  },
+  switch: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });
